@@ -9,7 +9,7 @@ security = HTTPBearer()
 router = APIRouter(
     prefix="/therapists",
     tags=["therapist-schedule"],
-    dependencies=[Depends(security)]
+    # dependencies=[Depends(security)]
 )
 
 

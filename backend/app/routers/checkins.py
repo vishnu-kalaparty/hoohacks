@@ -12,7 +12,7 @@ from app.services.embedding_pipeline import process_checkin_pipeline
 router = APIRouter(
     prefix="/checkins",
     tags=["checkins"],
-    dependencies=[Depends(security)]
+    # dependencies=[Depends(security)]
 )
 
 
@@ -177,7 +177,7 @@ async def get_checkin_status(
 async def manual_run_pipeline(
     session_id: int,
     db: SnowflakeDB = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    # user: dict = Depends(get_current_user)
 ):
     """Manually trigger embedding pipeline (for retry or admin)."""
     result = await db.fetch_one("""

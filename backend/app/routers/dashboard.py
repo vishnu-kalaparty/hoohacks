@@ -16,7 +16,7 @@ security = HTTPBearer()
 router = APIRouter(
     prefix="/dashboard",
     tags=["dashboard"],
-    dependencies=[Depends(security)]
+    # dependencies=[Depends(security)]
 )
 
 
@@ -48,7 +48,7 @@ async def get_patients(
 async def get_brief(
     patient_id: int,
     db: SnowflakeDB = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    # user: dict = Depends(get_current_user)
 ):
     """Get complete patient brief for therapist dashboard."""
     tasks = [
@@ -113,7 +113,7 @@ async def get_trends(
 @router.get("/patients/{patient_id}/question-trends")
 async def get_question_trends(
     patient_id: int,
-    user: dict = Depends(get_current_user)
+    # user: dict = Depends(get_current_user)
 ):
     """Get per-question HRV trends."""
     trends = await get_question_hrv_trends(patient_id)
@@ -128,7 +128,7 @@ async def get_sparkline(
     patient_id: int,
     question_id: str,
     db: SnowflakeDB = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    # user: dict = Depends(get_current_user)
 ):
     """Get HRV sparkline for specific question over time."""
     rows = await db.query("""
@@ -150,7 +150,7 @@ async def get_patient_similar_sessions(
     patient_id: int,
     session_id: int = Query(None, description="Session to compare against. Uses latest if omitted."),
     limit: int = Query(20, ge=1, le=50),
-    user: dict = Depends(get_current_user)
+    # user: dict = Depends(get_current_user)
 ):
     """
     Find historically similar sessions based on situation text embeddings.
@@ -183,7 +183,7 @@ async def get_patient_similar_sessions(
 async def get_session_detail(
     session_id: int,
     db: SnowflakeDB = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    # user: dict = Depends(get_current_user)
 ):
     """Get full detail for a single session (day view)."""
     session = await db.fetch_one("""

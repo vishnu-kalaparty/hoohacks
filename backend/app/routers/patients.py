@@ -9,14 +9,14 @@ security = HTTPBearer()
 router = APIRouter(
     prefix="/patients",
     tags=["patients"],
-    dependencies=[Depends(security)]
+    # dependencies=[Depends(security)]
 )
 
 @router.get("/get-questions/{patient_id}")
 async def get_patient_questions(
     patient_id: int,
     db: SnowflakeDB = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    # user: dict = Depends(get_current_user)
 ):
     """Get all questions for patient based on their assigned scale type.
     
@@ -54,7 +54,7 @@ async def get_patient_questions(
 async def get_patient(
     patient_id: int,
     db: SnowflakeDB = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    # user: dict = Depends(get_current_user)
 ):
     """Get patient info."""
     result = await db.query("""
@@ -92,7 +92,7 @@ async def get_history(
 async def get_next_checkin(
     patient_id: int,
     db: SnowflakeDB = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    # user: dict = Depends(get_current_user)
 ):
     """Get next scheduled checkin."""
     row = await db.query("""

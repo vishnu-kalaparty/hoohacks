@@ -12,7 +12,7 @@ security = HTTPBearer()
 router = APIRouter(
     prefix="/auth",
     tags=["authentication"],
-    dependencies=[Depends(security)]
+    # dependencies=[Depends(security)]
 )
 
 class UserProfileResponse(BaseModel):
@@ -52,13 +52,14 @@ async def get_auth_config():
 
 @router.get("/me", response_model=UserProfileResponse)
 async def get_current_user_info(
-    user: dict = Depends(get_current_user),
+    # user: dict = Depends(get_current_user),
     db: SnowflakeDB = Depends(get_db)
 ):
     """Get current user's full profile from our database.
     
     This checks both PATIENTS and THERAPISTS tables to find the user.
     """
+    user = {}  # TODO: restore Depends(get_current_user)
     auth0_user_id = user.get("sub")
     email = user.get("email", "")
     name = user.get("name", "")
@@ -111,13 +112,14 @@ async def get_current_user_info(
 @router.post("/sync-user", response_model=UserProfileResponse)
 async def sync_user(
     data: SyncUserRequest,
-    user: dict = Depends(get_current_user),
+    # user: dict = Depends(get_current_user),
     db: SnowflakeDB = Depends(get_db)
 ):
     """Sync Auth0 user to our database after first login.
     
     Call this after user logs in with Auth0 to create their record in our DB.
     """
+    user = {}  # TODO: restore Depends(get_current_user)
     auth0_user_id = user.get("sub")
     email = user.get("email", "")
     name = data.name or user.get("name", "")
@@ -193,7 +195,7 @@ async def sync_user(
 
 @router.post("/login")
 async def login(
-    user: dict = Depends(get_current_user),
+    # user: dict = Depends(get_current_user),
     db: SnowflakeDB = Depends(get_db)
 ):
     """Login endpoint - returns user profile if exists, or indicates need for registration.
@@ -205,6 +207,7 @@ async def login(
     4. If user new -> return {needs_registration: true} 
        -> Frontend calls /auth/sync-user to create account
     """
+    user = {}  # TODO: restore Depends(get_current_user)
     auth0_user_id = user.get("sub")
     email = user.get("email", "")
     name = user.get("name", "")
@@ -265,8 +268,11 @@ async def login(
 
 
 @router.get("/public-test")
-async def public_test(user: dict = Depends(get_current_user_optional)):
+async def public_test(
+    # user: dict = Depends(get_current_user_optional)
+):
     """Public endpoint that also accepts optional authentication."""
+    user = None  # TODO: restore Depends(get_current_user_optional)
     if user:
         return {
             "message": "Hello authenticated user!",
