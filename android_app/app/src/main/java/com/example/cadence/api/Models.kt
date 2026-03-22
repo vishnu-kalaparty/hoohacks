@@ -54,13 +54,14 @@ data class PatientListResponse(
 )
 
 data class ApiPatient(
-    @SerializedName("PATIENT_ID") val patientId: Int,
-    @SerializedName("NAME") val name: String,
-    @SerializedName("EMAIL") val email: String?,
-    @SerializedName("ASSIGNED_SCALE") val assignedScale: String?,
-    @SerializedName("CHECKIN_COUNT") val checkinCount: Int?,
-    @SerializedName("LATEST_SCORE") val latestScore: Int?,
-    @SerializedName("LATEST_CHECKIN") val latestCheckin: String?
+    @SerializedName(value = "PATIENT_ID", alternate = ["patient_id"]) val patientId: Int,
+    @SerializedName(value = "NAME", alternate = ["name"]) val name: String,
+    @SerializedName(value = "EMAIL", alternate = ["email"]) val email: String?,
+    @SerializedName(value = "ASSIGNED_SCALE", alternate = ["assigned_scale"]) val assignedScale: String?,
+    @SerializedName(value = "CHECKIN_COUNT", alternate = ["checkin_count"]) val checkinCount: Int?,
+    /** Snowflake / JSON may send integer or float — Gson is picky on Int vs Double. */
+    @SerializedName(value = "LATEST_SCORE", alternate = ["latest_score"]) val latestScore: Double?,
+    @SerializedName(value = "LATEST_CHECKIN", alternate = ["latest_checkin"]) val latestCheckin: String?
 )
 
 data class ScaleQuestionsResponse(

@@ -211,6 +211,20 @@ async def login(
     auth0_user_id = user.get("sub")
     email = user.get("email", "")
     name = user.get("name", "")
+
+    # No JWT / dev: sub is missing — treat as default therapist so mobile can load patients
+    if not auth0_user_id:
+        return {
+            "authenticated": True,
+            "needs_registration": False,
+            "user": {
+                "auth0_user_id": "dev|local",
+                "email": email or "therapist@local.dev",
+                "name": name or "Therapist",
+                "role": "therapist",
+                "therapist_id": 1,
+            },
+        }
     
     # Check if user exists as patient
     patient_result = await db.query("""

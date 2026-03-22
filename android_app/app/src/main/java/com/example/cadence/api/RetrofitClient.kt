@@ -31,6 +31,9 @@ object RetrofitClient {
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val builder = chain.request().newBuilder()
+                // Ngrok free tier returns an HTML interstitial unless this header is set;
+                // without it the app parses HTML as JSON and every API call fails silently.
+                builder.addHeader("ngrok-skip-browser-warning", "true")
                 authToken?.let { builder.addHeader("Authorization", "Bearer $it") }
                 chain.proceed(builder.build())
             }

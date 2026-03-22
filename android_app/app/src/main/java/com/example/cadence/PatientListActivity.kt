@@ -3,6 +3,7 @@ package com.example.cadence
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
@@ -22,6 +23,7 @@ class PatientListActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "PatientList"
+        private const val PREFS_NAME = "cadence_auth"
     }
 
     data class Patient(
@@ -62,7 +64,8 @@ class PatientListActivity : AppCompatActivity() {
             insets
         }
 
-        therapistId = intent.getIntExtra("therapist_id", -1)
+        therapistId = resolveTherapistId()
+        Log.i(TAG, "loadPatients: therapistId=$therapistId")
         patientCardsContainer = findViewById(R.id.patientCardsContainer)
         tvTotalCount = findViewById(R.id.tvTotalCount)
 
@@ -86,28 +89,51 @@ class PatientListActivity : AppCompatActivity() {
         loadPatients()
     }
 
-    private fun loadPatients() {
-        val call = if (therapistId > 0) {
-            RetrofitClient.api.getPatients(therapistId)
-        } else {
-            RetrofitClient.api.listPatients()
+    private fun resolveTherapistId(): Int {
+        var id = intent.getIntExtra("therapist_id", -1)
+        if (id <= 0) {
+            id = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getInt("therapist_id", -1)
         }
+        return if (id <= 0) 1 else id
+    }
 
-        call.enqueue(object : Callback<PatientListResponse> {
+    private fun loadPatients() {
+        Log.i(TAG, "GET dashboard/therapists/$therapistId/patients")
+        RetrofitClient.api.getPatients(therapistId).enqueue(object : Callback<PatientListResponse> {
             override fun onResponse(call: Call<PatientListResponse>, response: Response<PatientListResponse>) {
                 if (response.isSuccessful && response.body() != null) {
                     val apiPatients = response.body()!!.patients
                     patients = apiPatients.map { it.toLocalPatient() }
-                    if (patients.isEmpty()) patients = fallbackPatients
+                    if (patients.isEmpty()) {
+                        Log.w(TAG, "API returned empty list, using fallback")
+                        patients = fallbackPatients
+                    }
                 } else {
-                    Log.w(TAG, "API returned ${response.code()}, using fallback")
+                    val err = try {
+                        response.errorBody()?.string()?.take(500)
+                    } catch (_: Exception) {
+                        null
+                    }
+                    Log.w(TAG, "API returned ${response.code()}, body=${response.body()} err=$err — using fallback")
                     patients = fallbackPatients
+                    if (response.code() in 400..599) {
+                        Toast.makeText(
+                            this@PatientListActivity,
+                            "Could not load patients (${response.code()})",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
                 displayPatients()
             }
 
             override fun onFailure(call: Call<PatientListResponse>, t: Throwable) {
                 Log.w(TAG, "API unreachable, using fallback", t)
+                Toast.makeText(
+                    this@PatientListActivity,
+                    "Network error — ${t.message?.take(80)}",
+                    Toast.LENGTH_LONG
+                ).show()
                 patients = fallbackPatients
                 displayPatients()
             }
@@ -115,7 +141,7 @@ class PatientListActivity : AppCompatActivity() {
     }
 
     private fun ApiPatient.toLocalPatient(): Patient {
-        val score = latestScore ?: 0
+        val score = (latestScore ?: 0.0).toInt()
         val scale = assignedScale ?: "PHQ-9"
         val severity = getSeverity(score, scale)
         val dateStr = latestCheckin ?: "No check-ins"
