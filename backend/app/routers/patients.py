@@ -1,14 +1,60 @@
 """Patient routes."""
 from fastapi import APIRouter, HTTPException, Depends
 from app.core.database import get_db, SnowflakeDB
+from app.core.auth import get_current_user
+from fastapi.security import HTTPBearer
 
-router = APIRouter(prefix="/patients", tags=["patients"])
+security = HTTPBearer()
 
+router = APIRouter(
+    prefix="/patients",
+    tags=["patients"],
+    dependencies=[Depends(security)]
+)
+
+@router.get("/get-questions/{patient_id}")
+async def get_patient_questions(
+    patient_id: int,
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    """Get all questions for patient based on their assigned scale type.
+    
+    First gets the patient's ASSIGNED_SCALE (PHQ-9 or GAD-7),
+    then returns all questions for that scale type.
+    """
+    # Get patient's assigned scale type
+    patient_result = await db.query("""
+        SELECT PATIENT_ID, NAME, ASSIGNED_SCALE
+        FROM CADENCE.PUBLIC.PATIENTS WHERE PATIENT_ID = %s
+    """, (patient_id,))
+    
+    if not patient_result:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    patient = patient_result[0]
+    scale_type = patient["ASSIGNED_SCALE"]
+    
+    # Get all questions for the patient's scale type
+    questions = await db.query("""
+        SELECT QUESTION_ID, QUESTION_TEXT, IS_VITALS_CORRELATED, CLINICAL_CONSTRUCT
+        FROM CADENCE.PUBLIC.SCALE_QUESTIONS
+        WHERE SCALE_TYPE = %s
+        ORDER BY QUESTION_ID
+    """, (scale_type,))
+    
+    return {
+        "patient_id": patient_id,
+        "patient_name": patient["NAME"],
+        "scale_type": scale_type,
+        "questions": questions
+    }
 
 @router.get("/{patient_id}")
 async def get_patient(
     patient_id: int,
-    db: SnowflakeDB = Depends(get_db)
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """Get patient info."""
     result = await db.query("""
@@ -45,7 +91,8 @@ async def get_history(
 @router.get("/{patient_id}/next-checkin")
 async def get_next_checkin(
     patient_id: int,
-    db: SnowflakeDB = Depends(get_db)
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """Get next scheduled checkin."""
     row = await db.query("""

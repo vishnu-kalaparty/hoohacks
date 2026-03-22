@@ -1,10 +1,18 @@
 """Check-in routes with embedding pipeline."""
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from app.core.database import get_db, SnowflakeDB
+from app.core.auth import get_current_user
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
 from app.models.schemas import CheckinSubmit
 from app.services.embedding_pipeline import process_checkin_pipeline
 
-router = APIRouter(prefix="/checkins", tags=["checkins"])
+router = APIRouter(
+    prefix="/checkins",
+    tags=["checkins"],
+    dependencies=[Depends(security)]
+)
 
 
 @router.get("/scale-questions/{scale_type}")
@@ -171,7 +179,8 @@ async def get_checkin_status(
 @router.post("/{session_id}/run-pipeline")
 async def manual_run_pipeline(
     session_id: int,
-    db: SnowflakeDB = Depends(get_db)
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """
     Manually trigger embedding pipeline (for retry or admin).

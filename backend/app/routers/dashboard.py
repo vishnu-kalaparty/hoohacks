@@ -2,13 +2,21 @@
 import asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from app.core.database import get_db, SnowflakeDB
+from app.core.auth import get_current_user
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
 from app.services.embedding_pipeline import (
     get_session_trends, 
     get_question_hrv_trends,
     get_cluster_comparison
 )
 
-router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+router = APIRouter(
+    prefix="/dashboard",
+    tags=["dashboard"],
+    dependencies=[Depends(security)]
+)
 
 
 @router.get("/therapists/{therapist_id}/patients")
@@ -32,7 +40,8 @@ async def get_patients(
 @router.get("/patients/{patient_id}/brief")
 async def get_brief(
     patient_id: int,
-    db: SnowflakeDB = Depends(get_db)
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """Get complete patient brief for therapist dashboard."""
     # Run queries concurrently
@@ -113,7 +122,8 @@ async def get_trends(
 
 @router.get("/patients/{patient_id}/question-trends")
 async def get_question_trends(
-    patient_id: int
+    patient_id: int,
+    user: dict = Depends(get_current_user)
 ):
     """Get per-question HRV trends."""
     trends = await get_question_hrv_trends(patient_id)
@@ -141,7 +151,8 @@ async def get_cluster_compare(
 async def get_sparkline(
     patient_id: int,
     question_id: str,
-    db: SnowflakeDB = Depends(get_db)
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """Get HRV sparkline for specific question over time."""
     rows = await db.query("""
@@ -164,7 +175,8 @@ async def confirm_cluster(
     therapist_id: int,
     cluster_label: str,
     direction: str,  # better, worse, different
-    db: SnowflakeDB = Depends(get_db)
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """Therapist confirms cluster comparison direction."""
     await db.execute("""
