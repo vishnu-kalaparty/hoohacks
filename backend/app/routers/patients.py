@@ -1,14 +1,15 @@
 """Patient routes."""
 from fastapi import APIRouter, HTTPException, Depends
 from app.core.database import get_db, SnowflakeDB
+from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/patients", tags=["patients"])
-
 
 @router.get("/{patient_id}")
 async def get_patient(
     patient_id: int,
-    db: SnowflakeDB = Depends(get_db)
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """Get patient info."""
     result = await db.query("""
@@ -45,7 +46,8 @@ async def get_history(
 @router.get("/{patient_id}/next-checkin")
 async def get_next_checkin(
     patient_id: int,
-    db: SnowflakeDB = Depends(get_db)
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """Get next scheduled checkin."""
     row = await db.query("""
