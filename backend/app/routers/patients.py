@@ -2,8 +2,15 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.core.database import get_db, SnowflakeDB
 from app.core.auth import get_current_user
+from fastapi.security import HTTPBearer
 
-router = APIRouter(prefix="/patients", tags=["patients"])
+security = HTTPBearer()
+
+router = APIRouter(
+    prefix="/patients",
+    tags=["patients"],
+    dependencies=[Depends(security)]
+)
 
 @router.get("/get-questions/{patient_id}")
 async def get_patient_questions(

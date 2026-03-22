@@ -3,13 +3,20 @@ import asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from app.core.database import get_db, SnowflakeDB
 from app.core.auth import get_current_user
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
 from app.services.embedding_pipeline import (
     get_session_trends, 
     get_question_hrv_trends,
     get_cluster_comparison
 )
 
-router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+router = APIRouter(
+    prefix="/dashboard",
+    tags=["dashboard"],
+    dependencies=[Depends(security)]
+)
 
 
 @router.get("/therapists/{therapist_id}/patients")
