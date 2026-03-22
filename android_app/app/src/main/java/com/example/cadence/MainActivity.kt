@@ -1,8 +1,8 @@
 package com.example.cadence
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -23,11 +23,12 @@ class MainActivity : AppCompatActivity() {
         val btnTherapist = findViewById<Button>(R.id.btnTherapist)
 
         btnPatient.setOnClickListener {
-            Toast.makeText(this, "Patient flow selected", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, CameraTestActivity::class.java)
+            startActivity(intent)
         }
 
         btnTherapist.setOnClickListener {
-            Toast.makeText(this, "Therapist flow selected", Toast.LENGTH_SHORT).show()
+            // Therapist flow logic can go here later
         }
     }
 }
