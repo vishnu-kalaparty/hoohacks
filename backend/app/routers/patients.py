@@ -1,5 +1,5 @@
 """Patient routes."""
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from app.core.database import get_db, SnowflakeDB
 from app.core.auth import get_current_user
 from fastapi.security import HTTPBearer
@@ -11,6 +11,50 @@ router = APIRouter(
     tags=["patients"],
     # dependencies=[Depends(security)]
 )
+
+
+@router.get("/")
+async def list_patients(
+    therapist_id: int = Query(None, description="Filter by therapist. Omit to list all."),
+    db: SnowflakeDB = Depends(get_db),
+):
+    """List patients with latest score and check-in count."""
+    if therapist_id is not None:
+        rows = await db.query("""
+            SELECT
+                p.PATIENT_ID, p.NAME, p.EMAIL, p.ASSIGNED_SCALE,
+                p.THERAPIST_ID, p.APPOINTMENT_DAY,
+                (SELECT COUNT(*) FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs
+                 WHERE cs.PATIENT_ID = p.PATIENT_ID) AS CHECKIN_COUNT,
+                (SELECT cs.SCALE_SCORE FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs
+                 WHERE cs.PATIENT_ID = p.PATIENT_ID
+                 ORDER BY cs.CHECKIN_DATE DESC LIMIT 1) AS LATEST_SCORE,
+                (SELECT cs.CHECKIN_DATE FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs
+                 WHERE cs.PATIENT_ID = p.PATIENT_ID
+                 ORDER BY cs.CHECKIN_DATE DESC LIMIT 1) AS LATEST_CHECKIN
+            FROM CADENCE.PUBLIC.PATIENTS p
+            WHERE p.THERAPIST_ID = %s
+            ORDER BY p.NAME
+        """, (therapist_id,))
+    else:
+        rows = await db.query("""
+            SELECT
+                p.PATIENT_ID, p.NAME, p.EMAIL, p.ASSIGNED_SCALE,
+                p.THERAPIST_ID, p.APPOINTMENT_DAY,
+                (SELECT COUNT(*) FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs
+                 WHERE cs.PATIENT_ID = p.PATIENT_ID) AS CHECKIN_COUNT,
+                (SELECT cs.SCALE_SCORE FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs
+                 WHERE cs.PATIENT_ID = p.PATIENT_ID
+                 ORDER BY cs.CHECKIN_DATE DESC LIMIT 1) AS LATEST_SCORE,
+                (SELECT cs.CHECKIN_DATE FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs
+                 WHERE cs.PATIENT_ID = p.PATIENT_ID
+                 ORDER BY cs.CHECKIN_DATE DESC LIMIT 1) AS LATEST_CHECKIN
+            FROM CADENCE.PUBLIC.PATIENTS p
+            ORDER BY p.NAME
+        """)
+
+    return {"patients": rows}
+
 
 @router.get("/get-questions/{patient_id}")
 async def get_patient_questions(
