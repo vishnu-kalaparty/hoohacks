@@ -28,7 +28,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnTherapist.setOnClickListener {
-            // Therapist flow logic can go here later
+            val intent = Intent(this, TherapistLoginActivity::class.java)
+            startActivity(intent)
         }
     }
 }

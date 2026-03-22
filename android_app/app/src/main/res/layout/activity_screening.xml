@@ -177,34 +177,15 @@
                 android:clickable="false"
                 android:buttonTint="@color/icon_teal" />
 
-            <LinearLayout
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/screening_answer_0"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_dark" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/screening_answer_0_score"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_gray" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_chevron_right"
-                android:contentDescription="Select" />
+                android:layout_marginStart="8dp"
+                android:text="@string/screening_answer_0"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
         </LinearLayout>
 
         <!-- Answer option 1: Several days -->
@@ -228,34 +209,15 @@
                 android:clickable="false"
                 android:buttonTint="@color/icon_teal" />
 
-            <LinearLayout
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/screening_answer_1"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_dark" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/screening_answer_1_score"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_gray" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_chevron_right"
-                android:contentDescription="Select" />
+                android:layout_marginStart="8dp"
+                android:text="@string/screening_answer_1"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
         </LinearLayout>
 
         <!-- Answer option 2: More than half the days -->
@@ -279,34 +241,15 @@
                 android:clickable="false"
                 android:buttonTint="@color/icon_teal" />
 
-            <LinearLayout
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/screening_answer_2"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_dark" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/screening_answer_2_score"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_gray" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_chevron_right"
-                android:contentDescription="Select" />
+                android:layout_marginStart="8dp"
+                android:text="@string/screening_answer_2"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
         </LinearLayout>
 
         <!-- Answer option 3: Nearly every day -->
@@ -330,35 +273,33 @@
                 android:clickable="false"
                 android:buttonTint="@color/icon_teal" />
 
-            <LinearLayout
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/screening_answer_3"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_dark" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/screening_answer_3_score"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_gray" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_chevron_right"
-                android:contentDescription="Select" />
+                android:layout_marginStart="8dp"
+                android:text="@string/screening_answer_3"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
         </LinearLayout>
+
+        <!-- Submit button -->
+        <TextView
+            android:id="@+id/btnSubmitAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/button_analytics"
+            android:gravity="center"
+            android:text="Submit"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:alpha="0.4"
+            android:clickable="true"
+            android:focusable="true" />
 
     </LinearLayout>
 </ScrollView>

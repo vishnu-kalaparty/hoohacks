@@ -70,4 +70,49 @@
     <string name="results_next_3">Treatment plan adjustments may be discussed</string>
     <string name="results_btn_done">Done</string>
     <string name="results_download">Download Results</string>
+
+    <string name="login_welcome">Welcome Back</string>
+    <string name="login_subtitle">Sign in to your therapist account</string>
+    <string name="login_email_label">Email Address</string>
+    <string name="login_email_hint">Enter your email</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_hint">Enter your password</string>
+    <string name="login_remember_me">Remember me</string>
+    <string name="login_forgot_password">Forgot password?</string>
+    <string name="login_sign_in">Sign in</string>
+    <string name="login_or">or</string>
+    <string name="login_need_help">Need help? Contact</string>
+    <string name="login_support">support</string>
+
+    <string name="plist_title">Patient Screening</string>
+    <string name="plist_total_patients">Total Patients:</string>
+    <string name="plist_filter">Filter</string>
+    <string name="plist_sort">Sort</string>
+    <string name="plist_chip_all">All</string>
+    <string name="plist_chip_critical">Critical</string>
+    <string name="plist_chip_severe">Severe</string>
+    <string name="plist_chip_moderate">Moderate</string>
+    <string name="plist_chip_mild">Mild</string>
+    <string name="plist_phq9_score">PHQ-9 Score</string>
+    <string name="plist_gad7_score">GAD-7 Score</string>
+    <string name="plist_view_analytics">View Analytics</string>
+
+    <string name="analytics_title">Patient Analytics</string>
+    <string name="analytics_discrepancy_detected">DISCREPANCY DETECTED</string>
+    <string name="analytics_vitals_title">Vitals Across High-Signal Questions</string>
+    <string name="analytics_tab_heart_rate">Heart Rate</string>
+    <string name="analytics_tab_resp_rate">Respiratory Rate</string>
+    <string name="analytics_normal_hr">Normal resting range: 60–100 bpm</string>
+    <string name="analytics_normal_rr">Normal resting range: 12–20 breaths/min</string>
+    <string name="analytics_phq9_title">PHQ-9: Depression Screening</string>
+    <string name="analytics_gad7_title">GAD-7: Anxiety Screening</string>
+    <string name="analytics_vitals_consistent">Vitals consistent</string>
+    <string name="analytics_discrepancy">DISCREPANCY</string>
+
+    <string name="insights_title">AI-Generated Clinical Insights</string>
+    <string name="insights_key_findings">Key Findings</string>
+    <string name="insights_discussion_points">Suggested Discussion Points</string>
+    <string name="insights_disclaimer">Clinical decision support only. Therapist judgment takes precedence.</string>
+    <string name="insights_export_pdf">Export PDF</string>
+    <string name="insights_add_notes">Add Session Notes</string>
 </resources>

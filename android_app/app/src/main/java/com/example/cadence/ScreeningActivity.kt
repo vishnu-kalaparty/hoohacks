@@ -60,6 +60,8 @@ class ScreeningActivity : AppCompatActivity() {
     private lateinit var progressFill: View
     private lateinit var answerCards: Array<LinearLayout>
     private lateinit var radioButtons: Array<RadioButton>
+    private lateinit var btnSubmit: TextView
+    private var selectedAnswer = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,6 +109,8 @@ class ScreeningActivity : AppCompatActivity() {
             findViewById(R.id.radio3)
         )
 
+        btnSubmit = findViewById(R.id.btnSubmitAnswer)
+
         val btnBack = findViewById<ImageView>(R.id.btnScreeningBack)
         btnBack.setOnClickListener { finish() }
 
@@ -115,15 +119,18 @@ class ScreeningActivity : AppCompatActivity() {
             answerCards[i].setOnClickListener { selectAnswer(i) }
         }
 
+        // Submit button
+        btnSubmit.setOnClickListener { submitAnswer() }
+
         // Display initial question
         displayQuestion()
 
-        // Start camera preview
-        if (checkCameraPermission()) {
-            startCamera()
-        } else {
-            requestCameraPermission()
-        }
+        // Start camera preview - TEMPORARILY DISABLED FOR DEBUGGING
+        // if (checkCameraPermission()) {
+        //     startCamera()
+        // } else {
+        //     requestCameraPermission()
+        // }
     }
 
     private fun displayQuestion() {
@@ -140,13 +147,20 @@ class ScreeningActivity : AppCompatActivity() {
         }
 
         // Reset answer selection
+        selectedAnswer = -1
         for (i in radioButtons.indices) {
             radioButtons[i].isChecked = false
             answerCards[i].setBackgroundResource(R.drawable.answer_card_background)
         }
+
+        // Disable submit button
+        btnSubmit.alpha = 0.4f
+        btnSubmit.isEnabled = false
     }
 
     private fun selectAnswer(score: Int) {
+        selectedAnswer = score
+
         // Update visual state
         for (i in radioButtons.indices) {
             radioButtons[i].isChecked = (i == score)
@@ -159,15 +173,20 @@ class ScreeningActivity : AppCompatActivity() {
         // Store score
         scores[currentQuestion] = score
 
-        // Auto-advance to next question after a short delay
-        answerCards[score].postDelayed({
-            if (currentQuestion < totalQuestions - 1) {
-                currentQuestion++
-                displayQuestion()
-            } else {
-                finishScreening()
-            }
-        }, 500)
+        // Enable submit button
+        btnSubmit.alpha = 1.0f
+        btnSubmit.isEnabled = true
+    }
+
+    private fun submitAnswer() {
+        if (selectedAnswer < 0) return
+
+        if (currentQuestion < totalQuestions - 1) {
+            currentQuestion++
+            displayQuestion()
+        } else {
+            finishScreening()
+        }
     }
 
     private fun finishScreening() {

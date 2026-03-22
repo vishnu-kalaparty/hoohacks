@@ -64,12 +64,12 @@ class BreatheActivity : AppCompatActivity() {
             }
         }.start()
 
-        // Start camera
-        if (checkCameraPermission()) {
-            startCamera()
-        } else {
-            requestCameraPermission()
-        }
+        // Start camera - TEMPORARILY DISABLED FOR DEBUGGING
+        // if (checkCameraPermission()) {
+        //     startCamera()
+        // } else {
+        //     requestCameraPermission()
+        // }
     }
 
     private fun startBreathingAnimation(
