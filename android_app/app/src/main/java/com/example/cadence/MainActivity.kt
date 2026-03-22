@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         val btnTherapist = findViewById<Button>(R.id.btnTherapist)
 
         btnPatient.setOnClickListener {
-            val intent = Intent(this, CameraTestActivity::class.java)
+            val intent = Intent(this, ConsentActivity::class.java)
             startActivity(intent)
         }
 

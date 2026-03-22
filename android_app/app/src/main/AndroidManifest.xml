@@ -26,6 +26,21 @@
         <activity
             android:name=".CameraTestActivity"
             android:exported="false" />
+        <activity
+            android:name=".ConsentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SelectScreeningActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ScreeningActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BreatheActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ResultsActivity"
+            android:exported="false" />
 
         <!-- Register the SDK's camera activity with a Material Components theme -->
         <activity
