@@ -1,6 +1,7 @@
 package com.example.cadence
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -10,8 +11,19 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.cadence.api.CheckinSubmitRequest
+import com.example.cadence.api.CheckinSubmitResponse
+import com.example.cadence.api.QuestionResponseItem
+import com.example.cadence.api.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ResultsActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "ResultsActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +52,6 @@ class ResultsActivity : AppCompatActivity() {
         val isPHQ9 = screeningType == SelectScreeningActivity.TYPE_PHQ9
         val maxScore = if (isPHQ9) 27 else 21
 
-        // Set scale title and label
         if (isPHQ9) {
             tvScaleTitle.text = getString(R.string.results_phq9_scale)
             tvScaleLabel.text = getString(R.string.results_phq9_label)
@@ -53,16 +64,13 @@ class ResultsActivity : AppCompatActivity() {
             scoreAccent.setBackgroundResource(R.color.info_blue)
         }
 
-        // Set score
         tvScore.text = totalScore.toString()
         tvScoreMax.text = "/$maxScore"
 
-        // Calculate severity
         val severity = getSeverity(totalScore, isPHQ9)
         tvSeverity.text = severity.label
         tvSeverity.setTextColor(getColor(severity.colorRes))
 
-        // Animate score bar
         scoreBarFill.post {
             val parent = scoreBarFill.parent as View
             val params = scoreBarFill.layoutParams
@@ -74,8 +82,9 @@ class ResultsActivity : AppCompatActivity() {
             )
         }
 
+        submitCheckin(screeningType, totalScore)
+
         btnDone.setOnClickListener {
-            // Navigate back to home
             val intent = android.content.Intent(this, MainActivity::class.java)
             intent.flags = android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
                     android.content.Intent.FLAG_ACTIVITY_NEW_TASK
@@ -86,6 +95,61 @@ class ResultsActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnDownload).setOnClickListener {
             Toast.makeText(this, "Download feature coming soon", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun submitCheckin(screeningType: String, totalScore: Int) {
+        val prefs = getSharedPreferences("cadence_auth", MODE_PRIVATE)
+        val patientId = prefs.getInt("patient_id", -1)
+
+        val scoresArray = intent.getIntArrayExtra("scores_array")
+        val hrvArray = intent.getDoubleArrayExtra("hrv_array")
+        val questionIds = intent.getStringArrayExtra("question_ids")
+        val avgHrv = intent.getDoubleExtra("avg_hrv", 0.0)
+        val avgBreathing = intent.getDoubleExtra("avg_breathing", 0.0)
+        val lastPulse = intent.getDoubleExtra("last_pulse", 0.0)
+
+        if (scoresArray == null || questionIds == null) {
+            Log.w(TAG, "No per-question data available, skipping submission")
+            return
+        }
+
+        val scaleType = if (screeningType == SelectScreeningActivity.TYPE_PHQ9) "PHQ-9" else "GAD-7"
+
+        val questionResponses = questionIds.indices.map { i ->
+            QuestionResponseItem(
+                question_id = questionIds[i],
+                response = scoresArray.getOrElse(i) { 0 },
+                hrv_at_question = hrvArray?.getOrElse(i) { null }?.let { if (it > 0) it else null }
+            )
+        }
+
+        val request = CheckinSubmitRequest(
+            patient_id = if (patientId > 0) patientId else 1,
+            scale_type = scaleType,
+            scale_score = totalScore,
+            hrv = avgHrv,
+            breathing_rate = avgBreathing,
+            pulse_rate = lastPulse,
+            distress = 0,
+            situation = "",
+            coping = "",
+            questions = questionResponses
+        )
+
+        RetrofitClient.api.submitCheckin(request).enqueue(object : Callback<CheckinSubmitResponse> {
+            override fun onResponse(call: Call<CheckinSubmitResponse>, response: Response<CheckinSubmitResponse>) {
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val sessionId = response.body()?.session_id
+                    Log.i(TAG, "Check-in submitted successfully, session_id=$sessionId")
+                } else {
+                    Log.w(TAG, "Check-in submission returned ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<CheckinSubmitResponse>, t: Throwable) {
+                Log.w(TAG, "Check-in submission failed (offline)", t)
+            }
+        })
     }
 
     private data class Severity(val label: String, val colorRes: Int)

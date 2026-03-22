@@ -55,10 +55,17 @@ class BreatheActivity : AppCompatActivity() {
 
             override fun onFinish() {
                 tvCountdown.text = "0"
-                val resultsIntent = Intent(this@BreatheActivity, ResultsActivity::class.java)
-                resultsIntent.putExtra("total_score", intent.getIntExtra("total_score", 0))
-                resultsIntent.putExtra("screening_type",
-                    intent.getStringExtra("screening_type") ?: SelectScreeningActivity.TYPE_PHQ9)
+                val resultsIntent = Intent(this@BreatheActivity, ResultsActivity::class.java).apply {
+                    putExtra("total_score", intent.getIntExtra("total_score", 0))
+                    putExtra("screening_type",
+                        intent.getStringExtra("screening_type") ?: SelectScreeningActivity.TYPE_PHQ9)
+                    putExtra("scores_array", intent.getIntArrayExtra("scores_array"))
+                    putExtra("hrv_array", intent.getDoubleArrayExtra("hrv_array"))
+                    putExtra("question_ids", intent.getStringArrayExtra("question_ids"))
+                    putExtra("avg_hrv", intent.getDoubleExtra("avg_hrv", 0.0))
+                    putExtra("avg_breathing", intent.getDoubleExtra("avg_breathing", 0.0))
+                    putExtra("last_pulse", intent.getDoubleExtra("last_pulse", 0.0))
+                }
                 startActivity(resultsIntent)
                 finish()
             }

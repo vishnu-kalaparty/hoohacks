@@ -6,18 +6,14 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.presagetech.smartspectra.SmartSpectraSdk
 
 class ScreeningActivity : AppCompatActivity() {
@@ -25,11 +21,12 @@ class ScreeningActivity : AppCompatActivity() {
     private var currentQuestion = 0
     private var totalQuestions = 0
     private lateinit var scores: IntArray
+    private lateinit var hrvPerQuestion: DoubleArray
     private lateinit var questions: Array<String>
-    private lateinit var screeningTitle: String
+    private lateinit var questionIds: Array<String>
+    private var screeningType: String = SelectScreeningActivity.TYPE_PHQ9
 
     private lateinit var tvQuestionCounter: TextView
-//    private lateinit var tvQuestionLabel: TextView
     private lateinit var tvQuestionText: TextView
     private lateinit var progressFill: View
     private lateinit var answerCards: Array<LinearLayout>
@@ -38,12 +35,17 @@ class ScreeningActivity : AppCompatActivity() {
     private var selectedAnswer = -1
 
     private var sdk: SmartSpectraSdk? = null
-
-    // --- THE HACKY FIX: THE LOCK ---
-    // This prevents the "Buffer Received" from moving the question twice
     private var isWaitingForData = false
 
+    private var lastPulseRate = 0.0
+    private var lastBreathingRate = 0.0
+    private var totalPulse = 0.0
+    private var totalBreathing = 0.0
+    private var vitalsSampleCount = 0
+
     companion object {
+        private const val TAG = "ScreeningActivity"
+
         private val PHQ9_QUESTIONS = arrayOf(
             "Over the last 2 weeks, how often have you been bothered by little interest or pleasure in doing things?",
             "Over the last 2 weeks, how often have you been bothered by feeling down, depressed, or hopeless?",
@@ -55,6 +57,16 @@ class ScreeningActivity : AppCompatActivity() {
             "Over the last 2 weeks, how often have you been bothered by moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual?",
             "Over the last 2 weeks, how often have you been bothered by thoughts that you would be better off dead, or of hurting yourself in some way?"
         )
+
+        private val GAD7_QUESTIONS = arrayOf(
+            "Over the last 2 weeks, how often have you been bothered by feeling nervous, anxious, or on edge?",
+            "Over the last 2 weeks, how often have you been bothered by not being able to stop or control worrying?",
+            "Over the last 2 weeks, how often have you been bothered by worrying too much about different things?",
+            "Over the last 2 weeks, how often have you been bothered by trouble relaxing?",
+            "Over the last 2 weeks, how often have you been bothered by being so restless that it's hard to sit still?",
+            "Over the last 2 weeks, how often have you been bothered by becoming easily annoyed or irritable?",
+            "Over the last 2 weeks, how often have you been bothered by feeling afraid, as if something awful might happen?"
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,24 +74,36 @@ class ScreeningActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_screening)
 
+        screeningType = intent.getStringExtra(SelectScreeningActivity.EXTRA_SCREENING_TYPE)
+            ?: SelectScreeningActivity.TYPE_PHQ9
+
         setupUI()
         setupPresageSDK()
         displayQuestion()
     }
 
     private fun setupUI() {
-        questions = PHQ9_QUESTIONS
+        val isPHQ9 = screeningType == SelectScreeningActivity.TYPE_PHQ9
+        questions = if (isPHQ9) PHQ9_QUESTIONS else GAD7_QUESTIONS
         totalQuestions = questions.size
         scores = IntArray(totalQuestions)
+        hrvPerQuestion = DoubleArray(totalQuestions)
+
+        questionIds = Array(totalQuestions) { "Q${it + 1}" }
 
         tvQuestionCounter = findViewById(R.id.tvQuestionCounter)
-//        tvQuestionLabel = findViewById(R.id.tvQuestionLabel)
         tvQuestionText = findViewById(R.id.tvQuestionText)
         progressFill = findViewById(R.id.screeningProgressFill)
         btnSubmit = findViewById(R.id.btnSubmitAnswer)
 
-        answerCards = arrayOf(findViewById(R.id.answer0), findViewById(R.id.answer1), findViewById(R.id.answer2), findViewById(R.id.answer3))
-        radioButtons = arrayOf(findViewById(R.id.radio0), findViewById(R.id.radio1), findViewById(R.id.radio2), findViewById(R.id.radio3))
+        answerCards = arrayOf(
+            findViewById(R.id.answer0), findViewById(R.id.answer1),
+            findViewById(R.id.answer2), findViewById(R.id.answer3)
+        )
+        radioButtons = arrayOf(
+            findViewById(R.id.radio0), findViewById(R.id.radio1),
+            findViewById(R.id.radio2), findViewById(R.id.radio3)
+        )
 
         for (i in answerCards.indices) {
             answerCards[i].setOnClickListener { selectAnswer(i) }
@@ -87,8 +111,6 @@ class ScreeningActivity : AppCompatActivity() {
 
         btnSubmit.setOnClickListener {
             if (selectedAnswer < 0) return@setOnClickListener
-
-            // Start the sequence
             isWaitingForData = true
             if (checkPermissions()) {
                 launchPresageCamera()
@@ -107,38 +129,39 @@ class ScreeningActivity : AppCompatActivity() {
 
             sdk?.setMetricsBufferObserver { buffer ->
                 runOnUiThread {
-                    // ONLY move if we are actually waiting for data for the CURRENT question
                     if (isWaitingForData) {
-                        Log.d("PresageTest", "Final Buffer Received for Question ${currentQuestion + 1}")
+                        Log.d(TAG, "Buffer received for Q${currentQuestion + 1}")
 
-                        // Process your data here if needed..
                         if (buffer.hasPulse() && buffer.pulse.rateCount > 0) {
                             val pulse = buffer.pulse.getRate(buffer.pulse.rateCount - 1).value
-//                            tvHeartRate.text = String.format("%.0f", pulse)
-                            Log.i("PresageTest", "Final HR: $pulse")
+                            lastPulseRate = pulse
+                            totalPulse += pulse
+                            hrvPerQuestion[currentQuestion] = pulse
+                            Log.i(TAG, "HR for Q${currentQuestion + 1}: $pulse")
                         }
 
-                        // Final Respiration Rate from buffer
                         if (buffer.hasBreathing() && buffer.breathing.rateCount > 0) {
                             val resp = buffer.breathing.getRate(buffer.breathing.rateCount - 1).value
-//                            tvRespRate.text = String.format("%.0f", resp)
-                            Log.i("PresageTest", "Final Resp: $resp")
+                            lastBreathingRate = resp
+                            totalBreathing += resp
+                            Log.i(TAG, "RR for Q${currentQuestion + 1}: $resp")
                         }
 
-                        isWaitingForData = false // Unlock
+                        vitalsSampleCount++
+                        isWaitingForData = false
                         moveToNextQuestion()
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.e("PresageTest", "Setup failed", e)
+            Log.e(TAG, "Presage setup failed", e)
         }
     }
 
     private val presageLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { _ ->
-        Log.d("PresageTest", "Camera Activity Closed. Waiting for background buffer...")
+        Log.d(TAG, "Camera closed, waiting for buffer...")
     }
 
     private fun launchPresageCamera() {
@@ -155,21 +178,13 @@ class ScreeningActivity : AppCompatActivity() {
 
     private fun moveToNextQuestion() {
         runOnUiThread {
-            // Unlock the state immediately
             isWaitingForData = false
-
             if (currentQuestion < totalQuestions - 1) {
                 currentQuestion++
-                Log.d("PresageTest", "Incrementing to: $currentQuestion")
-
                 displayQuestion()
-
-                // HACK: Sometimes the camera activity gets "stuck" in front.
-                // This ensures your ScreeningActivity is visible again.
                 val intent = Intent(this, ScreeningActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 startActivity(intent)
-
             } else {
                 finishScreening()
             }
@@ -183,7 +198,7 @@ class ScreeningActivity : AppCompatActivity() {
         radioButtons.forEach { it.isChecked = false }
         btnSubmit.isEnabled = false
         btnSubmit.alpha = 0.4f
-        btnSubmit.text = "Record & Next" // Clear instruction for the user
+        btnSubmit.text = "Record & Next"
     }
 
     private fun selectAnswer(score: Int) {
@@ -195,14 +210,26 @@ class ScreeningActivity : AppCompatActivity() {
     }
 
     private fun finishScreening() {
-        val intent = Intent(this, BreatheActivity::class.java)
-        intent.putExtra("total_score", scores.sum())
+        val avgHrv = if (vitalsSampleCount > 0) totalPulse / vitalsSampleCount else 0.0
+        val avgBreathing = if (vitalsSampleCount > 0) totalBreathing / vitalsSampleCount else 0.0
+
+        val intent = Intent(this, BreatheActivity::class.java).apply {
+            putExtra("total_score", scores.sum())
+            putExtra("screening_type", screeningType)
+            putExtra("scores_array", scores)
+            putExtra("hrv_array", hrvPerQuestion)
+            putExtra("question_ids", questionIds)
+            putExtra("avg_hrv", avgHrv)
+            putExtra("avg_breathing", avgBreathing)
+            putExtra("last_pulse", lastPulseRate)
+        }
         startActivity(intent)
         finish()
     }
 
     private fun checkPermissions() = ContextCompat.checkSelfPermission(
-        this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        this, Manifest.permission.CAMERA
+    ) == PackageManager.PERMISSION_GRANTED
 
     private fun requestPermissions() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 101)
