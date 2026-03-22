@@ -150,6 +150,9 @@ class TherapistLoginActivity : AppCompatActivity() {
     }
 
     private fun navigateDemoMode() {
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+            .remove("therapist_id")
+            .apply()
         Toast.makeText(this, "Demo mode — backend not connected", Toast.LENGTH_SHORT).show()
         val intent = Intent(this, PatientListActivity::class.java)
         intent.putExtra("therapist_id", -1)
