@@ -1,16 +1,8 @@
-"""Therapist dashboard routes with trends and clustering."""
+"""Therapist dashboard routes with trends."""
 import asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from app.core.database import get_db, SnowflakeDB
-from app.core.auth import get_current_user
-from fastapi.security import HTTPBearer
-
-security = HTTPBearer()
-from app.services.embedding_pipeline import (
-    get_session_trends, 
-    get_question_hrv_trends,
-    get_cluster_comparison
-)
+from app.services.embedding_pipeline import get_session_trends, get_question_hrv_trends
 
 router = APIRouter(
     prefix="/dashboard",
@@ -44,7 +36,6 @@ async def get_brief(
     user: dict = Depends(get_current_user)
 ):
     """Get complete patient brief for therapist dashboard."""
-    # Run queries concurrently
     tasks = [
         db.query("""
             SELECT * FROM CADENCE.PUBLIC.CHECKIN_SESSIONS
@@ -78,24 +69,10 @@ async def get_brief(
             AND cs.CHECKIN_DATE >= DATEADD(day, -7, CURRENT_DATE)
             LIMIT 1
         """, (patient_id,)),
-        
-        db.query("""
-            SELECT DISTINCT SITUATION_CLUSTER
-            FROM CADENCE.PUBLIC.CHECKIN_SESSIONS
-            WHERE PATIENT_ID = %s AND SITUATION_CLUSTER IS NOT NULL
-        """, (patient_id,))
     ]
     
     results = await asyncio.gather(*tasks)
-    latest, weekly, vitals, flag, clusters = results
-    
-    # Get cluster comparisons
-    cluster_comparisons = []
-    for cluster_row in clusters:
-        cluster_label = cluster_row["SITUATION_CLUSTER"]
-        comparison = await get_cluster_comparison(patient_id, cluster_label)
-        if comparison:
-            cluster_comparisons.append(comparison)
+    latest, weekly, vitals, flag = results
     
     return {
         "patient_id": patient_id,
@@ -103,8 +80,6 @@ async def get_brief(
         "weekly_trend": weekly,
         "question_vitals": vitals,
         "flags": ["PHQ-9 Q9 elevated - discuss in session"] if flag else [],
-        "clusters": [c["cluster_label"] for c in clusters],
-        "cluster_comparisons": cluster_comparisons
     }
 
 
@@ -133,20 +108,6 @@ async def get_question_trends(
     }
 
 
-@router.get("/patients/{patient_id}/cluster/{cluster_label}/comparison")
-async def get_cluster_compare(
-    patient_id: int,
-    cluster_label: str
-):
-    """Get earliest vs latest comparison for a cluster."""
-    comparison = await get_cluster_comparison(patient_id, cluster_label)
-    
-    if not comparison:
-        raise HTTPException(status_code=404, detail="Cluster not found or no data")
-    
-    return comparison
-
-
 @router.get("/patients/{patient_id}/sparkline/{question_id}")
 async def get_sparkline(
     patient_id: int,
@@ -167,22 +128,3 @@ async def get_sparkline(
         "question_id": question_id,
         "readings": rows
     }
-
-
-@router.post("/patients/{patient_id}/confirm-cluster")
-async def confirm_cluster(
-    patient_id: int,
-    therapist_id: int,
-    cluster_label: str,
-    direction: str,  # better, worse, different
-    db: SnowflakeDB = Depends(get_db),
-    user: dict = Depends(get_current_user)
-):
-    """Therapist confirms cluster comparison direction."""
-    await db.execute("""
-        INSERT INTO CADENCE.PUBLIC.THERAPIST_CONFIRMATIONS
-        (THERAPIST_ID, PATIENT_ID, CLUSTER_LABEL, COMPARISON_DIRECTION)
-        VALUES (%s, %s, %s, %s)
-    """, (therapist_id, patient_id, cluster_label, direction))
-    
-    return {"success": True, "message": f"Confirmed {direction} for {cluster_label}"}

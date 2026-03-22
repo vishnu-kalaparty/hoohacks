@@ -8,6 +8,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -17,7 +18,8 @@ class CameraTestActivity : AppCompatActivity() {
 
     private lateinit var tvHeartRate: TextView
     private lateinit var tvRespRate: TextView
-    private lateinit var tvOxygen: TextView
+    private var sdk: SmartSpectraSdk? = null
+    private var isRecordingSession = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +27,6 @@ class CameraTestActivity : AppCompatActivity() {
 
         tvHeartRate = findViewById(R.id.tvHeartRate)
         tvRespRate = findViewById(R.id.tvRespRate)
-        tvOxygen = findViewById(R.id.tvOxygen)
         val btnLaunch = findViewById<Button>(R.id.btnLaunchCamera)
 
         btnLaunch.setOnClickListener {
@@ -35,56 +36,54 @@ class CameraTestActivity : AppCompatActivity() {
                 requestPermissions()
             }
         }
-        
-        // Setup SDK initial config
+
+        setupPresageSDK()
+    }
+
+    private fun setupPresageSDK() {
         try {
             SmartSpectraSdk.initialize(this.applicationContext)
-            val sdk = SmartSpectraSdk.getInstance()
-            sdk.setApiKey("ExO2F77fHN9MPSCXnmTt67TcPrKi0tc5aqSJK63Z")
-            sdk.setMeasurementDuration(30.0)
+            sdk = SmartSpectraSdk.getInstance()
+            sdk?.setApiKey("ExO2F77fHN9MPSCXnmTt67TcPrKi0tc5aqSJK63Z")
+            sdk?.setMeasurementDuration(20.0) // Set to 20 seconds
 
-            sdk.setEdgeMetricsObserver { metrics ->
+            // Metrics Buffer Observer (Accurate Final Results)
+            sdk?.setMetricsBufferObserver { buffer ->
                 runOnUiThread {
-                    Log.d("PresageTest", "Received Metrics: $metrics")
-                    // The metrics object usually has fields like pulseRate, breathingRate, oxygenSaturation
-                    // Since we are debugging, we'll try to extract them safely.
-                    // If metrics is a Map or a specific object, adjust accordingly.
-                    val metricsStr = metrics.toString()
-                    
-                    // Simple parser for common SDK outputs if it's a string
-                    if (metricsStr.contains("pulseRate")) {
-                        tvHeartRate.text = extractValue(metricsStr, "pulseRate")
+                    Log.d("PresageTest", "Final Buffer Received!")
+
+                    // Final Heart Rate from buffer
+                    if (buffer.hasPulse() && buffer.pulse.rateCount > 0) {
+                        val pulse = buffer.pulse.getRate(buffer.pulse.rateCount - 1).value
+                        tvHeartRate.text = String.format("%.0f", pulse)
+                        Log.i("PresageTest", "Final HR: $pulse")
                     }
-                    if (metricsStr.contains("breathingRate")) {
-                        tvRespRate.text = extractValue(metricsStr, "breathingRate")
-                    }
-                    if (metricsStr.contains("oxygenSaturation")) {
-                        tvOxygen.text = extractValue(metricsStr, "oxygenSaturation")
+
+                    // Final Respiration Rate from buffer
+                    if (buffer.hasBreathing() && buffer.breathing.rateCount > 0) {
+                        val resp = buffer.breathing.getRate(buffer.breathing.rateCount - 1).value
+                        tvRespRate.text = String.format("%.0f", resp)
+                        Log.i("PresageTest", "Final Resp: $resp")
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.e("PresageTest", "Initial Setup failed", e)
+            Log.e("PresageTest", "Setup failed", e)
         }
     }
 
-    private fun extractValue(data: String, key: String): String {
-        return try {
-            val start = data.indexOf(key) + key.length + 1
-            var end = data.indexOf(",", start)
-            if (end == -1) end = data.indexOf(")", start)
-            if (end == -1) end = data.length
-            data.substring(start, end).replace("=", "").trim()
-        } catch (e: Exception) {
-            "--"
-        }
+    private val presageLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { _ ->
+        // No action needed here as the observer handles data
+        Log.d("PresageTest", "Camera Activity Closed")
     }
 
     private fun launchPresageCamera() {
         try {
             val intent = Intent()
             intent.setClassName(this, "com.presagetech.smartspectra.ui.SmartSpectraActivity")
-            startActivity(intent)
+            presageLauncher.launch(intent)
         } catch (e: Exception) {
             Log.e("PresageTest", "Launch failed", e)
             Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -102,8 +101,6 @@ class CameraTestActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(rc, p, g)
         if (rc == 101 && g.isNotEmpty() && g[0] == PackageManager.PERMISSION_GRANTED) {
             launchPresageCamera()
-        } else {
-            Toast.makeText(this, "Camera permission required", Toast.LENGTH_LONG).show()
         }
     }
 }

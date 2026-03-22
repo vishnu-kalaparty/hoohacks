@@ -50,15 +50,6 @@ SELECT
     'Quiet weekend felt peaceful', 'Read a book'
 FROM CADENCE.PUBLIC.PATIENTS p WHERE p.AUTH0_USER_ID = 'auth0|patient_001';
 
--- Update clusters
-UPDATE CHECKIN_SESSIONS 
-SET SITUATION_CLUSTER = 'cluster_work'
-WHERE SITUATION_TEXT LIKE '%work%' OR SITUATION_TEXT LIKE '%project%';
-
-UPDATE CHECKIN_SESSIONS 
-SET SITUATION_CLUSTER = 'cluster_relaxation'
-WHERE SITUATION_TEXT LIKE '%weekend%' OR SITUATION_TEXT LIKE '%peaceful%';
-
 -- =====================================================
 -- PATIENT 2: GAD-7, Stable
 -- =====================================================
@@ -70,20 +61,20 @@ FROM CADENCE.PUBLIC.THERAPISTS WHERE AUTH0_USER_ID = 'auth0|therapist_001';
 
 INSERT INTO CADENCE.PUBLIC.CHECKIN_SESSIONS 
     (PATIENT_ID, CHECKIN_DATE, SCALE_TYPE, SCALE_SCORE, HRV_VALUE, BREATHING_RATE, PULSE_RATE, 
-     DISTRESS_RATING, SITUATION_TEXT, COPING_TEXT, SITUATION_CLUSTER)
+     DISTRESS_RATING, SITUATION_TEXT, COPING_TEXT)
 SELECT 
     p.PATIENT_ID, DATEADD(day, -35, CURRENT_DATE), 'GAD-7', 14, 52.0, 16.5, 72, 7,
-    'Social gathering anxiety', 'Left early', 'cluster_social'
+    'Social gathering anxiety', 'Left early'
 FROM CADENCE.PUBLIC.PATIENTS p WHERE p.AUTH0_USER_ID = 'auth0|patient_002'
 UNION ALL
 SELECT 
     p.PATIENT_ID, DATEADD(day, -21, CURRENT_DATE), 'GAD-7', 14, 50.8, 17.0, 74, 7,
-    'Another social event', 'Used breathing', 'cluster_social'
+    'Another social event', 'Used breathing'
 FROM CADENCE.PUBLIC.PATIENTS p WHERE p.AUTH0_USER_ID = 'auth0|patient_002'
 UNION ALL
 SELECT 
     p.PATIENT_ID, DATEADD(day, -7, CURRENT_DATE), 'GAD-7', 13, 52.5, 16.5, 71, 6,
-    'Dinner with colleagues', 'Focused on one', 'cluster_social'
+    'Dinner with colleagues', 'Focused on one'
 FROM CADENCE.PUBLIC.PATIENTS p WHERE p.AUTH0_USER_ID = 'auth0|patient_002';
 
 -- =====================================================
@@ -97,20 +88,20 @@ FROM CADENCE.PUBLIC.THERAPISTS WHERE AUTH0_USER_ID = 'auth0|therapist_001';
 
 INSERT INTO CADENCE.PUBLIC.CHECKIN_SESSIONS 
     (PATIENT_ID, CHECKIN_DATE, SCALE_TYPE, SCALE_SCORE, HRV_VALUE, BREATHING_RATE, PULSE_RATE, 
-     DISTRESS_RATING, SITUATION_TEXT, COPING_TEXT, SITUATION_CLUSTER)
+     DISTRESS_RATING, SITUATION_TEXT, COPING_TEXT)
 SELECT 
     p.PATIENT_ID, DATEADD(day, -28, CURRENT_DATE), 'PHQ-9', 12, 54.0, 16.0, 70, 6,
-    'Felt down but manageable', 'Went for run', 'cluster_general'
-FROM CADENCE.PUBLIC.CADENCE.PUBLIC.PATIENTS p WHERE p.AUTH0_USER_ID = 'auth0|patient_003'
+    'Felt down but manageable', 'Went for run'
+FROM CADENCE.PUBLIC.PATIENTS p WHERE p.AUTH0_USER_ID = 'auth0|patient_003'
 UNION ALL
 SELECT 
     p.PATIENT_ID, DATEADD(day, -21, CURRENT_DATE), 'PHQ-9', 14, 50.0, 17.0, 74, 7,
-    'Relationship conflict', 'Journaled', 'cluster_relationship'
+    'Relationship conflict', 'Journaled'
 FROM CADENCE.PUBLIC.PATIENTS p WHERE p.AUTH0_USER_ID = 'auth0|patient_003'
 UNION ALL
 SELECT 
     p.PATIENT_ID, DATEADD(day, -3, CURRENT_DATE), 'PHQ-9', 16, 46.0, 18.5, 79, 8,
-    'Feeling hopeless', 'Crisis line', 'cluster_crisis'
+    'Feeling hopeless', 'Crisis line'
 FROM CADENCE.PUBLIC.PATIENTS p WHERE p.AUTH0_USER_ID = 'auth0|patient_003';
 
 -- Question vitals with Q9 = 2 (elevated)

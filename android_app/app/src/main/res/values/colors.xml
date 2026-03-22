@@ -9,4 +9,13 @@
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#E0F2F7</color>
     <color name="icon_teal">#1E8B8B</color>
+    <color name="card_background">#F0FAFA</color>
+    <color name="card_border">#1E8B8B</color>
+    <color name="text_dark">#1A1A2E</color>
+    <color name="text_gray">#6B7280</color>
+    <color name="text_muted">#9CA3AF</color>
+    <color name="divider">#E5E7EB</color>
+    <color name="background_light">#FFFFFF</color>
+    <color name="info_blue">#3B82C8</color>
+    <color name="footer_bg">#F9FAFB</color>
 </resources>

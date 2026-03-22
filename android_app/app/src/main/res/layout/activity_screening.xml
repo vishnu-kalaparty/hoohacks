@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light"
+    android:fillViewport="true"
+    tools:context=".ScreeningActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header with back arrow, title, and camera preview -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="12dp">
+
+            <!-- Back arrow -->
+            <ImageView
+                android:id="@+id/btnScreeningBack"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_arrow_back"
+                android:contentDescription="Back"
+                android:padding="4dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                 />
+
+            <!-- Title and question counter -->
+            <LinearLayout
+                android:id="@+id/titleContainer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toEndOf="@id/btnScreeningBack"
+                app:layout_constraintEnd_toStartOf="@id/cameraContainer"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/tvScreeningTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/screening_title"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/icon_teal" />
+
+                <TextView
+                    android:id="@+id/tvQuestionCounter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Question 1 of 16"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_gray" />
+            </LinearLayout>
+
+            <!-- Camera preview container -->
+            <FrameLayout
+                android:id="@+id/cameraContainer"
+                android:layout_width="100dp"
+                android:layout_height="120dp"
+                android:background="@drawable/camera_preview_background"
+                android:clipChildren="true"
+                android:clipToPadding="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.camera.view.PreviewView
+                    android:id="@+id/cameraPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <!-- Recording indicator dot -->
+                <View
+                    android:id="@+id/recordingDot"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="6dp"
+                    android:background="@drawable/recording_dot" />
+            </FrameLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Progress bar -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/progress_bar_background" />
+
+            <View
+                android:id="@+id/screeningProgressFill"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/progress_bar_fill" />
+        </FrameLayout>
+
+        <!-- Question card -->
+        <LinearLayout
+            android:id="@+id/questionCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/question_card_background"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:padding="20dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_question_badge"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="Question" />
+
+<!--                <TextView-->
+<!--                    android:id="@+id/tvQuestionLabel"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="QUESTION 1"-->
+<!--                    android:textSize="13sp"-->
+<!--                    android:textStyle="bold"-->
+<!--                    android:textColor="@color/icon_teal"-->
+<!--                    android:letterSpacing="0.05" />-->
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvQuestionText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Over the last 2 weeks, how often have you been bothered by little interest or pleasure in doing things?"
+                android:textSize="20sp"
+                android:textColor="@color/text_dark"
+                android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+
+        <!-- Answer option 0: Not at all -->
+        <LinearLayout
+            android:id="@+id/answer0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/answer_card_background"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="10dp"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <RadioButton
+                android:id="@+id/radio0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:buttonTint="@color/icon_teal" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/screening_answer_0"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
+        </LinearLayout>
+
+        <!-- Answer option 1: Several days -->
+        <LinearLayout
+            android:id="@+id/answer1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/answer_card_background"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="10dp"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <RadioButton
+                android:id="@+id/radio1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:buttonTint="@color/icon_teal" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/screening_answer_1"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
+        </LinearLayout>
+
+        <!-- Answer option 2: More than half the days -->
+        <LinearLayout
+            android:id="@+id/answer2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/answer_card_background"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="10dp"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <RadioButton
+                android:id="@+id/radio2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:buttonTint="@color/icon_teal" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/screening_answer_2"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
+        </LinearLayout>
+
+        <!-- Answer option 3: Nearly every day -->
+        <LinearLayout
+            android:id="@+id/answer3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/answer_card_background"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <RadioButton
+                android:id="@+id/radio3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:buttonTint="@color/icon_teal" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/screening_answer_3"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
+        </LinearLayout>
+
+        <!-- Submit button -->
+        <TextView
+            android:id="@+id/btnSubmitAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/button_analytics"
+            android:gravity="center"
+            android:text="Submit"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:alpha="0.4"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+</ScrollView>
