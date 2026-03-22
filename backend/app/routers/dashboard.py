@@ -9,6 +9,7 @@ from app.services.embedding_pipeline import (
     get_question_hrv_trends,
     get_similar_sessions,
     get_latest_session,
+    get_latest_session_with_embedding,
 )
 
 security = HTTPBearer()
@@ -173,12 +174,21 @@ async def get_patient_similar_sessions(
         latest = await get_latest_session(patient_id)
         if not latest:
             raise HTTPException(status_code=404, detail="No sessions found for patient")
-        anchor_session_id = latest["SESSION_ID"]
-        if not latest.get("HAS_EMBEDDING"):
-            raise HTTPException(
-                status_code=422,
-                detail="Latest session has no embedding yet. Pipeline may still be processing."
-            )
+        if latest.get("HAS_EMBEDDING"):
+            anchor_session_id = latest["SESSION_ID"]
+        else:
+            # Newest check-in may not have run embedding yet; use latest session that does
+            with_vec = await get_latest_session_with_embedding(patient_id)
+            if with_vec:
+                anchor_session_id = with_vec["SESSION_ID"]
+            else:
+                return {
+                    "patient_id": patient_id,
+                    "anchor_session_id": latest["SESSION_ID"],
+                    "similar_sessions": [],
+                    "count": 0,
+                    "note": "No situation embeddings yet; run pipeline or wait for processing.",
+                }
 
     similar = await get_similar_sessions(patient_id, anchor_session_id, limit)
 

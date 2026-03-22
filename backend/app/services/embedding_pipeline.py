@@ -1,5 +1,7 @@
 """Embedding pipeline using Snowflake Cortex."""
 import logging
+from typing import Any, Dict, Optional
+
 from app.core.database import SnowflakeDB
 
 logger = logging.getLogger(__name__)
@@ -132,6 +134,25 @@ async def get_latest_session(patient_id: int) -> dict:
             SITUATION_VECTOR IS NOT NULL AS HAS_EMBEDDING
         FROM CADENCE.PUBLIC.CHECKIN_SESSIONS
         WHERE PATIENT_ID = %s
+        ORDER BY CHECKIN_DATE DESC
+        LIMIT 1
+    """, (patient_id,))
+
+    return row[0] if row else None
+
+
+async def get_latest_session_with_embedding(patient_id: int) -> Optional[Dict[str, Any]]:
+    """Most recent session that already has a situation embedding (for similarity search)."""
+    db = SnowflakeDB()
+
+    row = await db.query("""
+        SELECT 
+            SESSION_ID, CHECKIN_DATE, SCALE_TYPE, SCALE_SCORE,
+            HRV_VALUE, BREATHING_RATE, DISTRESS_RATING,
+            SITUATION_TEXT, COPING_TEXT,
+            TRUE AS HAS_EMBEDDING
+        FROM CADENCE.PUBLIC.CHECKIN_SESSIONS
+        WHERE PATIENT_ID = %s AND SITUATION_VECTOR IS NOT NULL
         ORDER BY CHECKIN_DATE DESC
         LIMIT 1
     """, (patient_id,))
