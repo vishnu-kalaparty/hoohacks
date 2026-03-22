@@ -4,10 +4,30 @@
     android:height="60dp"
     android:viewportWidth="60"
     android:viewportHeight="60">
+
+    <!-- Outer ear curve -->
     <path
-        android:fillColor="@color/icon_teal"
-        android:pathData="M20,15 L20,45 L25,45 L25,15 Z" />
+        android:strokeColor="@color/icon_teal"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M22,10 C38,6 52,16 52,32 C52,46 42,56 30,56 C26,56 22,52 24,48 C26,44 32,40 32,34 C32,26 24,20 22,12" />
+
+    <!-- Inner ear ridge -->
     <path
-        android:fillColor="@color/icon_teal"
-        android:pathData="M35,20 L35,45 L40,45 L40,20 Z" />
+        android:strokeColor="@color/icon_teal"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M36,20 C42,20 46,26 46,32 C46,38 42,44 36,44" />
+
+    <!-- Heartbeat / pulse line through the ear -->
+    <path
+        android:strokeColor="@color/icon_teal"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M4,32 L18,32 L22,22 L26,42 L30,16 L34,32 L56,32" />
 </vector>

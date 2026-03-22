@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light"
+    android:fillViewport="true"
+    tools:context=".FollowUpQuestionsActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Top bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="12dp">
+
+            <ImageView
+                android:id="@+id/btnFollowUpBack"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_back_arrow"
+                android:contentDescription="Back"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/followup_title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:gravity="center"
+                android:layout_marginEnd="32dp" />
+        </LinearLayout>
+
+        <!-- Progress indicator -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/followup_step"
+                android:textSize="12sp"
+                android:textColor="@color/text_muted"
+                android:layout_marginBottom="6dp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginBottom="6dp">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/score_bar_background" />
+
+                <View
+                    android:id="@+id/followUpProgressFill"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/score_bar_fill_teal" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Subtitle -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/followup_subtitle"
+            android:textSize="13sp"
+            android:textColor="@color/text_gray"
+            android:paddingHorizontal="20dp"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Question 1: Distress level 1-10 -->
+        <LinearLayout
+            android:id="@+id/questionDistress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/followup_q1_label"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/icon_teal"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/followup_q1"
+                android:textSize="16sp"
+                android:textColor="@color/text_dark"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp" />
+
+            <!-- 1-10 rating buttons in two rows -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="8dp">
+
+                <TextView android:id="@+id/rating1" style="@style/RatingButton" android:text="1" />
+                <TextView android:id="@+id/rating2" style="@style/RatingButton" android:text="2" />
+                <TextView android:id="@+id/rating3" style="@style/RatingButton" android:text="3" />
+                <TextView android:id="@+id/rating4" style="@style/RatingButton" android:text="4" />
+                <TextView android:id="@+id/rating5" style="@style/RatingButton" android:text="5" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="8dp">
+
+                <TextView android:id="@+id/rating6" style="@style/RatingButton" android:text="6" />
+                <TextView android:id="@+id/rating7" style="@style/RatingButton" android:text="7" />
+                <TextView android:id="@+id/rating8" style="@style/RatingButton" android:text="8" />
+                <TextView android:id="@+id/rating9" style="@style/RatingButton" android:text="9" />
+                <TextView android:id="@+id/rating10" style="@style/RatingButton" android:text="10" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Not distressing"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_muted" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Extremely distressing"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_muted"
+                    android:gravity="end" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Question 2: Stressful event yes/no -->
+        <LinearLayout
+            android:id="@+id/questionStressful"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/followup_q2_label"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/icon_teal"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/followup_q2"
+                android:textSize="16sp"
+                android:textColor="@color/text_dark"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:id="@+id/btnYes"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:gravity="center"
+                    android:text="Yes"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:background="@drawable/answer_card_background"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnNo"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:text="No"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:background="@drawable/answer_card_background"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+
+            <!-- Text field for description (shown when Yes) -->
+            <EditText
+                android:id="@+id/etStressDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_field_background"
+                android:padding="14dp"
+                android:hint="@string/followup_q2_hint"
+                android:textSize="14sp"
+                android:textColor="@color/text_dark"
+                android:textColorHint="@color/text_muted"
+                android:inputType="textCapSentences"
+                android:maxLines="2"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp" />
+        </LinearLayout>
+
+        <!-- Question 3: How did you handle it -->
+        <LinearLayout
+            android:id="@+id/questionCoping"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/followup_q3_label"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/icon_teal"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/followup_q3"
+                android:textSize="16sp"
+                android:textColor="@color/text_dark"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp" />
+
+            <EditText
+                android:id="@+id/etCoping"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_field_background"
+                android:padding="14dp"
+                android:hint="@string/followup_q3_hint"
+                android:textSize="14sp"
+                android:textColor="@color/text_dark"
+                android:textColorHint="@color/text_muted"
+                android:inputType="textCapSentences"
+                android:maxLines="2"
+                android:layout_marginBottom="16dp" />
+        </LinearLayout>
+
+        <!-- Submit / Next button -->
+        <TextView
+            android:id="@+id/btnFollowUpNext"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/button_analytics"
+            android:gravity="center"
+            android:text="@string/followup_next"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:alpha="0.4"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+</ScrollView>

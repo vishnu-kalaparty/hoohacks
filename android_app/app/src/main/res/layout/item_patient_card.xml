@@ -61,34 +61,54 @@
             android:background="@drawable/badge_critical" />
     </LinearLayout>
 
-    <!-- Score box -->
+    <!-- Score box - horizontal layout for better space usage -->
     <LinearLayout
         android:id="@+id/scoreBox"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:background="@drawable/score_box_background"
         android:paddingHorizontal="20dp"
-        android:paddingVertical="10dp"
+        android:paddingVertical="12dp"
+        android:gravity="center_vertical"
         android:layout_marginBottom="14dp">
 
-        <TextView
-            android:id="@+id/tvScoreLabel"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/plist_phq9_score"
-            android:textSize="11sp"
-            android:textColor="@color/text_gray"
-            android:layout_marginBottom="2dp" />
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvScoreLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/plist_phq9_score"
+                android:textSize="12sp"
+                android:textColor="@color/text_gray"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/tvScoreValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="22"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:textColor="@color/icon_teal" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/tvScoreValue"
+            android:id="@+id/tvSeverityLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="22"
-            android:textSize="24sp"
+            android:text="Moderate"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="@color/icon_teal" />
+            android:textColor="@color/text_dark"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="6dp"
+            android:background="@drawable/badge_moderate" />
     </LinearLayout>
 
     <!-- View Analytics button -->
@@ -106,6 +126,7 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:src="@drawable/ic_analytics"
+            android:tint="@color/white"
             android:layout_marginEnd="6dp"
             android:contentDescription="Analytics" />
 
@@ -115,7 +136,7 @@
             android:text="@string/plist_view_analytics"
             android:textSize="13sp"
             android:textStyle="bold"
-            android:textColor="@color/icon_teal" />
+            android:textColor="@color/white" />
     </LinearLayout>
 
 </LinearLayout>

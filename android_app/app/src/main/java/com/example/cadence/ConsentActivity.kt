@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -21,11 +22,23 @@ class ConsentActivity : AppCompatActivity() {
             insets
         }
 
+        // In production, screening type would be provided by backend API
+        val screeningType = SelectScreeningActivity.TYPE_PHQ9 // Backend will provide this
+        val questionCount = if (screeningType == SelectScreeningActivity.TYPE_PHQ9) 9 else 7
+        val screeningName = if (screeningType == SelectScreeningActivity.TYPE_PHQ9) "PHQ-9" else "GAD-7"
+
         val checkboxCamera = findViewById<CheckBox>(R.id.checkboxCamera)
         val checkboxDisclaimer = findViewById<CheckBox>(R.id.checkboxDisclaimer)
         val btnBeginScreening = findViewById<Button>(R.id.btnBeginScreening)
-        val btnBack = findViewById<Button>(R.id.btnBack)
+        val btnBack = findViewById<ImageView>(R.id.btnBack)
         val progressFill = findViewById<View>(R.id.progressFill)
+        val tvExpectBody = findViewById<android.widget.TextView>(R.id.tvExpectBody)
+
+        // Update question count dynamically based on screening type
+        tvExpectBody.text = android.text.Html.fromHtml(
+            "You'll answer <b>$questionCount questions</b> about how you've been feeling. Your camera will capture some health data during the process to provide accurate screening results.",
+            android.text.Html.FROM_HTML_MODE_LEGACY
+        )
 
         // Set progress bar to 33% (step 1 of 3)
         progressFill.post {
@@ -46,7 +59,8 @@ class ConsentActivity : AppCompatActivity() {
         checkboxDisclaimer.setOnCheckedChangeListener { _, _ -> updateButtonState() }
 
         btnBeginScreening.setOnClickListener {
-            val intent = Intent(this, SelectScreeningActivity::class.java)
+            val intent = Intent(this, ScreeningActivity::class.java)
+            intent.putExtra(SelectScreeningActivity.EXTRA_SCREENING_TYPE, screeningType)
             startActivity(intent)
         }
 

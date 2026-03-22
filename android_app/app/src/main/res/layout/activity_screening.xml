@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Header with back arrow, title, and camera preview -->
+        <!-- Header -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -22,7 +22,6 @@
             android:paddingTop="16dp"
             android:paddingBottom="12dp">
 
-            <!-- Back arrow -->
             <ImageView
                 android:id="@+id/btnScreeningBack"
                 android:layout_width="32dp"
@@ -32,9 +31,8 @@
                 android:padding="4dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@id/tvScreeningTitle" />
+                app:layout_constraintBottom_toBottomOf="@id/titleContainer" />
 
-            <!-- Title and question counter -->
             <LinearLayout
                 android:id="@+id/titleContainer"
                 android:layout_width="0dp"
@@ -63,14 +61,11 @@
                     android:textColor="@color/text_gray" />
             </LinearLayout>
 
-            <!-- Camera preview container -->
             <FrameLayout
                 android:id="@+id/cameraContainer"
                 android:layout_width="100dp"
                 android:layout_height="120dp"
                 android:background="@drawable/camera_preview_background"
-                android:clipChildren="true"
-                android:clipToPadding="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -79,7 +74,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
-                <!-- Recording indicator dot -->
                 <View
                     android:id="@+id/recordingDot"
                     android:layout_width="10dp"
@@ -284,19 +278,19 @@
                 android:textColor="@color/text_dark" />
         </LinearLayout>
 
-        <!-- Submit button -->
+        <!-- Primary Action: Dark Button -->
         <TextView
             android:id="@+id/btnSubmitAnswer"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="54dp"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/button_analytics"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/button_dark_selector"
             android:gravity="center"
             android:text="Submit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/white"
             android:alpha="0.4"
             android:clickable="true"
             android:focusable="true" />

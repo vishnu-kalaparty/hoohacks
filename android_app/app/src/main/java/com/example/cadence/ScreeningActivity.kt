@@ -35,7 +35,28 @@ class ScreeningActivity : AppCompatActivity() {
     private var latestHeartRate: Double = 0.0
     private var latestRespRate: Double = 0.0
     private var presageInitialized = false
-    private lateinit var presageLauncher: ActivityResultLauncher<Intent>
+
+    // CRITICAL: ActivityResultLauncher must be registered at class level, before onCreate
+    private val presageLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { _ ->
+        // Recording finished — store the latest vitals for the current question
+        if (::heartRates.isInitialized && ::respRates.isInitialized) {
+            heartRates[currentQuestion] = latestHeartRate
+            respRates[currentQuestion] = latestRespRate
+            Log.d("ScreeningActivity", "Q${currentQuestion + 1} vitals — HR: $latestHeartRate, RR: $latestRespRate")
+
+            // Now advance to next question or finish
+            if (currentQuestion < totalQuestions - 1) {
+                currentQuestion++
+                displayQuestion()
+            } else {
+                finishScreening()
+            }
+        } else {
+            Log.e("ScreeningActivity", "Arrays not initialized - cannot store vitals")
+        }
+    }
 
     companion object {
         private val PHQ9_QUESTIONS = arrayOf(
@@ -79,27 +100,6 @@ class ScreeningActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        // Register Presage activity result launcher
-        presageLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { _ ->
-            // Recording finished — store the latest vitals for the current question
-            heartRates[currentQuestion] = latestHeartRate
-            respRates[currentQuestion] = latestRespRate
-            Log.d("ScreeningActivity", "Q${currentQuestion + 1} vitals — HR: $latestHeartRate, RR: $latestRespRate")
-
-            // Now advance to next question or finish
-            if (currentQuestion < totalQuestions - 1) {
-                currentQuestion++
-                displayQuestion()
-            } else {
-                finishScreening()
-            }
-        }
-
-        // Initialize Presage SDK
-        initPresageSdk()
 
         // Load correct question set based on intent extra
         val screeningType = intent.getStringExtra(SelectScreeningActivity.EXTRA_SCREENING_TYPE)
@@ -154,6 +154,9 @@ class ScreeningActivity : AppCompatActivity() {
 
         // Display initial question
         displayQuestion()
+
+        // Initialize Presage SDK after UI is set up
+        initPresageSdk()
     }
 
     private fun displayQuestion() {
@@ -227,10 +230,18 @@ class ScreeningActivity : AppCompatActivity() {
 
     private fun initPresageSdk() {
         try {
+            Log.d("ScreeningActivity", "Starting Presage SDK initialization...")
             SmartSpectraSdk.initialize(this.applicationContext)
+            Log.d("ScreeningActivity", "SmartSpectraSdk.initialize() completed")
+            
             val sdk = SmartSpectraSdk.getInstance()
+            Log.d("ScreeningActivity", "Got SDK instance")
+            
             sdk.setApiKey("ExO2F77fHN9MPSCXnmTt67TcPrKi0tc5aqSJK63Z")
+            Log.d("ScreeningActivity", "API key set")
+            
             sdk.setMeasurementDuration(30.0)
+            Log.d("ScreeningActivity", "Measurement duration set")
 
             sdk.setEdgeMetricsObserver { metrics ->
                 runOnUiThread {
@@ -242,8 +253,10 @@ class ScreeningActivity : AppCompatActivity() {
             }
             presageInitialized = true
             Log.d("ScreeningActivity", "Presage SDK initialized successfully")
-        } catch (e: Exception) {
-            Log.e("ScreeningActivity", "Presage SDK init failed", e)
+        } catch (e: Throwable) {
+            // Catch Throwable to handle ALL errors including native UnsatisfiedLinkError,
+            // ExceptionInInitializerError, NoClassDefFoundError, etc.
+            Log.e("ScreeningActivity", "Presage SDK init failed: ${e.javaClass.simpleName} - ${e.message}", e)
             presageInitialized = false
         }
     }
