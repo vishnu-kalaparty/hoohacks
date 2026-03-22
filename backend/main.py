@@ -7,7 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import  PROJECT_NAME, VERSION, ALLOWED_HOSTS, AUTH0_CONFIG
 from app.middleware.audit import AuditLogMiddleware
 from app.core.auth import get_current_user
-from app.routers import patients, checkins, dashboard, therapist_schedule， auth
+from app.routers import patients, checkins, dashboard, therapist_schedule, auth
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +19,7 @@ app = FastAPI(
 )
 
 # CORS — pinned to explicit origins; falls back to localhost dev defaults.
-_origins = ALLOWED_ORIGINS or [
-    "http://localhost:3000",
-    "http://localhost:8501",
-]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_HOSTS,
