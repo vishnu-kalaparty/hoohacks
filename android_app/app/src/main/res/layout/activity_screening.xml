@@ -32,7 +32,7 @@
                 android:padding="4dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@id/tvScreeningTitle" />
+                 />
 
             <!-- Title and question counter -->
             <LinearLayout
@@ -135,15 +135,15 @@
                     android:layout_marginEnd="8dp"
                     android:contentDescription="Question" />
 
-                <TextView
-                    android:id="@+id/tvQuestionLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="QUESTION 1"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/icon_teal"
-                    android:letterSpacing="0.05" />
+<!--                <TextView-->
+<!--                    android:id="@+id/tvQuestionLabel"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="QUESTION 1"-->
+<!--                    android:textSize="13sp"-->
+<!--                    android:textStyle="bold"-->
+<!--                    android:textColor="@color/icon_teal"-->
+<!--                    android:letterSpacing="0.05" />-->
             </LinearLayout>
 
             <TextView
