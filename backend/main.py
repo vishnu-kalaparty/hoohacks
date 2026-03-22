@@ -5,7 +5,7 @@ Auris Backend - MVP (Async + Dependency Injection)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import patients, checkins, dashboard
+from app.routers import patients, checkins, dashboard, therapist_schedule
 
 app = FastAPI(title="Auris MVP", version="0.1.0")
 
@@ -22,6 +22,7 @@ app.add_middleware(
 app.include_router(patients.router)
 app.include_router(checkins.router)
 app.include_router(dashboard.router)
+app.include_router(therapist_schedule.router)
 
 
 @app.get("/")
