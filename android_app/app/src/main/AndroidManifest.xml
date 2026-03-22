@@ -4,6 +4,7 @@
     package="com.example.cadence">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.camera" />
 
     <application
@@ -25,6 +26,15 @@
         </activity>
         <activity
             android:name=".CameraTestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TherapistPatientsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SimilarSessionsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SessionDetailActivity"
             android:exported="false" />
 
         <!-- Register the SDK's camera activity with a Material Components theme -->

@@ -1,8 +1,17 @@
 """Therapist dashboard routes with trends."""
 import asyncio
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from app.core.database import get_db, SnowflakeDB
-from app.services.embedding_pipeline import get_session_trends, get_question_hrv_trends
+from app.core.auth import get_current_user
+from fastapi.security import HTTPBearer
+from app.services.embedding_pipeline import (
+    get_session_trends,
+    get_question_hrv_trends,
+    get_similar_sessions,
+    get_latest_session,
+)
+
+security = HTTPBearer()
 
 router = APIRouter(
     prefix="/dashboard",
@@ -16,12 +25,18 @@ async def get_patients(
     therapist_id: int,
     db: SnowflakeDB = Depends(get_db)
 ):
-    """Get therapist's patients with check-in count."""
+    """Get therapist's patients with check-in count and latest score."""
     rows = await db.query("""
         SELECT 
             p.PATIENT_ID, p.NAME, p.EMAIL, p.ASSIGNED_SCALE,
             (SELECT COUNT(*) FROM CHECKIN_SESSIONS cs 
-             WHERE cs.PATIENT_ID = p.PATIENT_ID) as CHECKIN_COUNT
+             WHERE cs.PATIENT_ID = p.PATIENT_ID) as CHECKIN_COUNT,
+            (SELECT cs.SCALE_SCORE FROM CHECKIN_SESSIONS cs
+             WHERE cs.PATIENT_ID = p.PATIENT_ID
+             ORDER BY cs.CHECKIN_DATE DESC LIMIT 1) as LATEST_SCORE,
+            (SELECT cs.CHECKIN_DATE FROM CHECKIN_SESSIONS cs
+             WHERE cs.PATIENT_ID = p.PATIENT_ID
+             ORDER BY cs.CHECKIN_DATE DESC LIMIT 1) as LATEST_CHECKIN
         FROM CADENCE.PUBLIC.PATIENTS p
         WHERE p.THERAPIST_ID = %s
     """, (therapist_id,))
@@ -127,4 +142,71 @@ async def get_sparkline(
         "patient_id": patient_id,
         "question_id": question_id,
         "readings": rows
+    }
+
+
+@router.get("/patients/{patient_id}/similar-sessions")
+async def get_patient_similar_sessions(
+    patient_id: int,
+    session_id: int = Query(None, description="Session to compare against. Uses latest if omitted."),
+    limit: int = Query(20, ge=1, le=50),
+    user: dict = Depends(get_current_user)
+):
+    """
+    Find historically similar sessions based on situation text embeddings.
+    Returns similar sessions sorted by cosine similarity, with dates and scores
+    suitable for time-series graphing on the therapist dashboard.
+    """
+    anchor_session_id = session_id
+    if anchor_session_id is None:
+        latest = await get_latest_session(patient_id)
+        if not latest:
+            raise HTTPException(status_code=404, detail="No sessions found for patient")
+        anchor_session_id = latest["SESSION_ID"]
+        if not latest.get("HAS_EMBEDDING"):
+            raise HTTPException(
+                status_code=422,
+                detail="Latest session has no embedding yet. Pipeline may still be processing."
+            )
+
+    similar = await get_similar_sessions(patient_id, anchor_session_id, limit)
+
+    return {
+        "patient_id": patient_id,
+        "anchor_session_id": anchor_session_id,
+        "similar_sessions": similar,
+        "count": len(similar),
+    }
+
+
+@router.get("/sessions/{session_id}/detail")
+async def get_session_detail(
+    session_id: int,
+    db: SnowflakeDB = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    """Get full detail for a single session (day view)."""
+    session = await db.fetch_one("""
+        SELECT 
+            SESSION_ID, PATIENT_ID, CHECKIN_DATE, SCALE_TYPE, SCALE_SCORE,
+            HRV_VALUE, BREATHING_RATE, PULSE_RATE,
+            DISTRESS_RATING, SITUATION_TEXT, COPING_TEXT
+        FROM CADENCE.PUBLIC.CHECKIN_SESSIONS
+        WHERE SESSION_ID = %s
+    """, (session_id,))
+
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    questions = await db.query("""
+        SELECT QUESTION_ID, QUESTION_TEXT, RESPONSE_VALUE, HRV_AT_QUESTION,
+               IS_VITALS_CORRELATED, SCALE_TYPE
+        FROM CADENCE.PUBLIC.QUESTION_VITALS
+        WHERE SESSION_ID = %s
+        ORDER BY QUESTION_ID
+    """, (session_id,))
+
+    return {
+        "session": session,
+        "questions": questions,
     }
