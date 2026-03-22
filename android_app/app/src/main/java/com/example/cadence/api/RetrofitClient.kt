@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    var baseUrl = "http://10.0.2.2:8000/"
+    var baseUrl = "https://rayford-unoperatable-unqualifyingly.ngrok-free.dev"
         private set
 
     private var authToken: String? = null
