@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+snowflake-connector-python[async]
+python-dotenv
+pydantic
+aiohttp
