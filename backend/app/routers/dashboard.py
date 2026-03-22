@@ -27,19 +27,28 @@ async def get_patients(
 ):
     """Get therapist's patients with check-in count and latest score."""
     rows = await db.query("""
-        SELECT 
-            p.PATIENT_ID, p.NAME, p.EMAIL, p.ASSIGNED_SCALE,
-            (SELECT COUNT(*) FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs
-             WHERE cs.PATIENT_ID = p.PATIENT_ID) AS CHECKIN_COUNT,
-            (SELECT cs.SCALE_SCORE FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs
-             WHERE cs.PATIENT_ID = p.PATIENT_ID
-             ORDER BY cs.CHECKIN_DATE DESC
-             LIMIT 1) AS LATEST_SCORE,
-            (SELECT cs.CHECKIN_DATE FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs
-             WHERE cs.PATIENT_ID = p.PATIENT_ID
-             ORDER BY cs.CHECKIN_DATE DESC
-             LIMIT 1) AS LATEST_CHECKIN
+        WITH session_stats AS (
+            SELECT
+                PATIENT_ID,
+                SCALE_SCORE,
+                CHECKIN_DATE,
+                COUNT(*) OVER (PARTITION BY PATIENT_ID) AS CHECKIN_COUNT,
+                ROW_NUMBER() OVER (
+                    PARTITION BY PATIENT_ID ORDER BY CHECKIN_DATE DESC
+                ) AS rn
+            FROM CADENCE.PUBLIC.CHECKIN_SESSIONS
+        )
+        SELECT
+            p.PATIENT_ID,
+            p.NAME,
+            p.EMAIL,
+            p.ASSIGNED_SCALE,
+            COALESCE(s.CHECKIN_COUNT, 0) AS CHECKIN_COUNT,
+            s.SCALE_SCORE AS LATEST_SCORE,
+            s.CHECKIN_DATE AS LATEST_CHECKIN
         FROM CADENCE.PUBLIC.PATIENTS p
+        LEFT JOIN session_stats s
+            ON s.PATIENT_ID = p.PATIENT_ID AND s.rn = 1
         WHERE p.THERAPIST_ID = %s
     """, (therapist_id,))
     
