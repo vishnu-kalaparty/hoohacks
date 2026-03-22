@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">Cadence</string>
+    <string name="app_name">Auris</string>
+    <string name="app_title">Auris</string>
+    <string name="app_tagline">Mental health screening with\nphysiological insights</string>
+    <string name="btn_patient">I'm a Patient</string>
+    <string name="btn_therapist">I'm a Therapist</string>
 </resources>

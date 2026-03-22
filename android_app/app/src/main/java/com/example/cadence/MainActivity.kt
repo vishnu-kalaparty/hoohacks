@@ -1,6 +1,8 @@
 package com.example.cadence
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -15,6 +17,17 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        val btnPatient = findViewById<Button>(R.id.btnPatient)
+        val btnTherapist = findViewById<Button>(R.id.btnTherapist)
+
+        btnPatient.setOnClickListener {
+            Toast.makeText(this, "Patient flow selected", Toast.LENGTH_SHORT).show()
+        }
+
+        btnTherapist.setOnClickListener {
+            Toast.makeText(this, "Therapist flow selected", Toast.LENGTH_SHORT).show()
         }
     }
 }
