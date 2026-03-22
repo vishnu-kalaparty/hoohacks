@@ -68,7 +68,13 @@
     <string name="results_next_1">Your therapist will review these results</string>
     <string name="results_next_2">They may schedule a follow-up session</string>
     <string name="results_next_3">Treatment plan adjustments may be discussed</string>
-    <string name="results_btn_done">Done</string>
+    <string name="results_checkin_title">Before you finish</string>
+    <string name="results_checkin_subtitle">Optional — helps your care team understand context</string>
+    <string name="results_distress_label">Distress right now (0 = none, 10 = extreme)</string>
+    <string name="results_situation_hint">What situation has been most on your mind?</string>
+    <string name="results_coping_hint">What has helped you cope?</string>
+    <string name="results_btn_done">Save &amp; send to care team</string>
+    <string name="results_sending">Sending…</string>
     <string name="results_download">Download Results</string>
 
     <string name="login_welcome">Welcome Back</string>

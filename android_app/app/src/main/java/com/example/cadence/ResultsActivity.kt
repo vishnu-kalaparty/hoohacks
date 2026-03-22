@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -23,7 +25,14 @@ class ResultsActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "ResultsActivity"
+        private const val PREFS_NAME = "cadence_auth"
     }
+
+    private lateinit var btnDone: Button
+    private lateinit var seekDistress: SeekBar
+    private lateinit var etSituation: EditText
+    private lateinit var etCoping: EditText
+    private var submitInFlight = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +56,10 @@ class ResultsActivity : AppCompatActivity() {
         val scoreBarFill = findViewById<View>(R.id.scoreBarFill)
         val scoreAccent = findViewById<View>(R.id.scoreAccent)
         val ivScaleIcon = findViewById<ImageView>(R.id.ivScaleIcon)
-        val btnDone = findViewById<Button>(R.id.btnDone)
+        btnDone = findViewById(R.id.btnDone)
+        seekDistress = findViewById(R.id.seekDistress)
+        etSituation = findViewById(R.id.etSituation)
+        etCoping = findViewById(R.id.etCoping)
 
         val isPHQ9 = screeningType == SelectScreeningActivity.TYPE_PHQ9
         val maxScore = if (isPHQ9) 27 else 21
@@ -82,14 +94,9 @@ class ResultsActivity : AppCompatActivity() {
             )
         }
 
-        submitCheckin(screeningType, totalScore)
-
         btnDone.setOnClickListener {
-            val intent = android.content.Intent(this, MainActivity::class.java)
-            intent.flags = android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            finish()
+            if (submitInFlight) return@setOnClickListener
+            submitCheckinAndFinish(screeningType, totalScore)
         }
 
         findViewById<View>(R.id.btnDownload).setOnClickListener {
@@ -97,8 +104,12 @@ class ResultsActivity : AppCompatActivity() {
         }
     }
 
-    private fun submitCheckin(screeningType: String, totalScore: Int) {
-        val prefs = getSharedPreferences("cadence_auth", MODE_PRIVATE)
+    /**
+     * Runs after screening + breathing flow. Sends one payload: per-question scores & vitals,
+     * aggregate vitals, distress, situation/coping text.
+     */
+    private fun submitCheckinAndFinish(screeningType: String, totalScore: Int) {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val patientId = prefs.getInt("patient_id", -1)
 
         val scoresArray = intent.getIntArrayExtra("scores_array")
@@ -109,11 +120,19 @@ class ResultsActivity : AppCompatActivity() {
         val lastPulse = intent.getDoubleExtra("last_pulse", 0.0)
 
         if (scoresArray == null || questionIds == null) {
-            Log.w(TAG, "No per-question data available, skipping submission")
+            Toast.makeText(
+                this,
+                "Screening data incomplete; cannot send check-in.",
+                Toast.LENGTH_LONG
+            ).show()
+            Log.w(TAG, "Missing scores_array or question_ids")
             return
         }
 
         val scaleType = if (screeningType == SelectScreeningActivity.TYPE_PHQ9) "PHQ-9" else "GAD-7"
+        val distress = seekDistress.progress
+        val situation = etSituation.text?.toString()?.trim().orEmpty()
+        val coping = etCoping.text?.toString()?.trim().orEmpty()
 
         val questionResponses = questionIds.indices.map { i ->
             QuestionResponseItem(
@@ -130,26 +149,57 @@ class ResultsActivity : AppCompatActivity() {
             hrv = avgHrv,
             breathing_rate = avgBreathing,
             pulse_rate = lastPulse,
-            distress = 0,
-            situation = "",
-            coping = "",
+            distress = distress,
+            situation = situation,
+            coping = coping,
             questions = questionResponses
         )
 
+        submitInFlight = true
+        btnDone.isEnabled = false
+        btnDone.text = getString(R.string.results_sending)
+
         RetrofitClient.api.submitCheckin(request).enqueue(object : Callback<CheckinSubmitResponse> {
             override fun onResponse(call: Call<CheckinSubmitResponse>, response: Response<CheckinSubmitResponse>) {
+                submitInFlight = false
+                btnDone.isEnabled = true
+                btnDone.text = getString(R.string.results_btn_done)
+
                 if (response.isSuccessful && response.body()?.success == true) {
                     val sessionId = response.body()?.session_id
-                    Log.i(TAG, "Check-in submitted successfully, session_id=$sessionId")
+                    Log.i(TAG, "Check-in submitted, session_id=$sessionId")
+                    Toast.makeText(this@ResultsActivity, "Check-in sent.", Toast.LENGTH_SHORT).show()
+                    goHome()
                 } else {
-                    Log.w(TAG, "Check-in submission returned ${response.code()}")
+                    Log.w(TAG, "Check-in returned ${response.code()}")
+                    Toast.makeText(
+                        this@ResultsActivity,
+                        "Could not send check-in (${response.code()}). Try again.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
 
             override fun onFailure(call: Call<CheckinSubmitResponse>, t: Throwable) {
-                Log.w(TAG, "Check-in submission failed (offline)", t)
+                submitInFlight = false
+                btnDone.isEnabled = true
+                btnDone.text = getString(R.string.results_btn_done)
+                Log.w(TAG, "Check-in failed", t)
+                Toast.makeText(
+                    this@ResultsActivity,
+                    "Network error. Check-in not sent. Try again.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         })
+    }
+
+    private fun goHome() {
+        val intent = android.content.Intent(this, MainActivity::class.java)
+        intent.flags = android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
     }
 
     private data class Severity(val label: String, val colorRes: Int)

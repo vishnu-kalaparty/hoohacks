@@ -320,6 +320,73 @@
                 android:textColor="@color/text_gray" />
         </LinearLayout>
 
+        <!-- Final check-in narrative (sent with questionnaire + vitals) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/results_checkin_title"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_dark"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/results_checkin_subtitle"
+            android:textSize="12sp"
+            android:textColor="@color/text_gray"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="12dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/score_card_background"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="20dp"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/results_distress_label"
+                android:textSize="13sp"
+                android:textColor="@color/text_dark"
+                android:layout_marginBottom="4dp" />
+
+            <SeekBar
+                android:id="@+id/seekDistress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="10"
+                android:progress="5"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/etSituation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minLines="2"
+                android:gravity="top|start"
+                android:hint="@string/results_situation_hint"
+                android:inputType="textMultiLine|textCapSentences"
+                android:textSize="14sp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/etCoping"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minLines="2"
+                android:gravity="top|start"
+                android:hint="@string/results_coping_hint"
+                android:inputType="textMultiLine|textCapSentences"
+                android:textSize="14sp" />
+        </LinearLayout>
+
         <!-- Done button -->
         <Button
             android:id="@+id/btnDone"

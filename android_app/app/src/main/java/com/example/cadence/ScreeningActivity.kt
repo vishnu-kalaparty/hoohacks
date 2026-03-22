@@ -182,9 +182,6 @@ class ScreeningActivity : AppCompatActivity() {
             if (currentQuestion < totalQuestions - 1) {
                 currentQuestion++
                 displayQuestion()
-                val intent = Intent(this, ScreeningActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                startActivity(intent)
             } else {
                 finishScreening()
             }
