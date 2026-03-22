@@ -39,3 +39,9 @@ class ScaleQuestion(BaseModel):
     question_text: str
     is_vitals_correlated: bool
     clinical_construct: Optional[str] = None
+
+
+class TherapistScheduleInsert(BaseModel):
+    """Therapist assigns future check-in due dates (CHECKIN_SCHEDULE rows)."""
+    patient_id: int
+    scheduled_dates: List[date]

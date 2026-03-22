@@ -1,13 +1,15 @@
 """
 Auris Backend - MVP (Async + Dependency Injection + Auth0)
 """
-
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import PROJECT_NAME, VERSION, ALLOWED_HOSTS, AUTH0_CONFIG
+from app.core.config import  PROJECT_NAME, VERSION, ALLOWED_HOSTS, AUTH0_CONFIG
+from app.middleware.audit import AuditLogMiddleware
 from app.core.auth import get_current_user
-from app.routers import patients, checkins, dashboard, auth
+from app.routers import patients, checkins, dashboard, therapist_schedule， auth
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title=PROJECT_NAME,
@@ -15,20 +17,28 @@ app = FastAPI(
     description="Auris API with Auth0 authentication"
 )
 
-# CORS
+# CORS — pinned to explicit origins; falls back to localhost dev defaults.
+_origins = ALLOWED_ORIGINS or [
+    "http://localhost:3000",
+    "http://localhost:8501",
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_HOSTS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+
+# HIPAA audit trail — logs every PHI-touching request to Snowflake.
+app.add_middleware(AuditLogMiddleware)
 
 # Include routers
 app.include_router(patients.router)
 app.include_router(checkins.router)
 app.include_router(dashboard.router)
 app.include_router(auth.router)
+app.include_router(therapist_schedule.router)
 
 
 @app.get("/")
@@ -43,8 +53,8 @@ async def health():
         db = get_db()
         await db.query("SELECT 1")
         return {"status": "healthy", "db": "connected"}
-    except Exception as e:
-        return {"status": "unhealthy", "error": str(e)}
+    except Exception:
+        return {"status": "unhealthy"}
 
 
 # @app.get("/auth/config")

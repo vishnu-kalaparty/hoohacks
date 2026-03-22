@@ -2,7 +2,10 @@
 import asyncio
 import snowflake.connector
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Callable, TypeVar
 from app.core.config import SNOWFLAKE_CONFIG
+
+T = TypeVar("T")
 
 _executor = ThreadPoolExecutor(max_workers=10)
 
@@ -56,6 +59,24 @@ class SnowflakeDB:
         """Fetch single row."""
         rows = await self.query(sql, params)
         return rows[0] if rows else None
+
+    async def run_transaction(self, fn: Callable[[Any], T]) -> T:
+        """Run ``fn(conn)`` on one connection; commit on success, rollback on error."""
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(_executor, self._sync_transaction, fn)
+
+    def _sync_transaction(self, fn: Callable[[Any], T]) -> T:
+        cfg = {**SNOWFLAKE_CONFIG, "autocommit": False}
+        conn = snowflake.connector.connect(**cfg)
+        try:
+            result = fn(conn)
+            conn.commit()
+            return result
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
 
 
 # Dependency to inject

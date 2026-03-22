@@ -41,75 +41,109 @@ async def submit_checkin(
     Submit check-in.
     Embedding pipeline runs in background after submission.
     """
-    try:
-        # 1. Insert session
-        await db.execute("""
-            INSERT INTO CADENCE.PUBLIC.CHECKIN_SESSIONS 
-            (PATIENT_ID, CHECKIN_DATE, SCALE_TYPE, SCALE_SCORE, 
-             HRV_VALUE, BREATHING_RATE, PULSE_RATE, 
-             DISTRESS_RATING, SITUATION_TEXT, COPING_TEXT)
-            VALUES (%s, CURRENT_DATE, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            data.patient_id, data.scale_type, data.scale_score,
-            data.hrv, data.breathing_rate, data.pulse_rate,
-            data.distress, data.situation, data.coping
-        ))
-        
-        # Get session_id
-        result = await db.fetch_one("""
-            SELECT SESSION_ID FROM CADENCE.PUBLIC.CHECKIN_SESSIONS 
-            WHERE PATIENT_ID = %s AND CHECKIN_DATE = CURRENT_DATE
-            ORDER BY COMPLETED_AT DESC LIMIT 1
-        """, (data.patient_id,))
-        
-        if not result:
-            raise HTTPException(status_code=500, detail="Failed to get session_id")
-            
-        session_id = result["SESSION_ID"]
-        
-        # 2. Insert question vitals
-        for q in data.questions:
-            q_info = await db.fetch_one("""
-                SELECT QUESTION_TEXT, IS_VITALS_CORRELATED 
-                FROM CADENCE.PUBLIC.SCALE_QUESTIONS 
-                WHERE SCALE_TYPE = %s AND QUESTION_ID = %s
-            """, (data.scale_type, q.question_id))
-            
-            if q_info:
-                await db.execute("""
-                    INSERT INTO CADENCE.PUBLIC.QUESTION_VITALS
-                    (SESSION_ID, PATIENT_ID, QUESTION_ID, QUESTION_TEXT, SCALE_TYPE,
-                     RESPONSE_VALUE, HRV_AT_QUESTION, IS_VITALS_CORRELATED, CAPTURED_AT)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
-                """, (
-                    session_id, data.patient_id, q.question_id, 
-                    q_info["QUESTION_TEXT"], data.scale_type,
-                    q.response, q.hrv_at_question, q_info["IS_VITALS_CORRELATED"]
-                ))
-        
-        # 3. Mark schedule complete
-        await db.execute("""
-            UPDATE CADENCE.PUBLIC.CHECKIN_SCHEDULE 
-            SET COMPLETED = TRUE, COMPLETED_AT = CURRENT_TIMESTAMP
-            WHERE PATIENT_ID = %s AND SCHEDULED_DATE = CURRENT_DATE
-        """, (data.patient_id,))
-        
-        # 4. Trigger embedding pipeline (BACKGROUND TASK)
-        background_tasks.add_task(
-            process_checkin_pipeline, 
-            session_id=session_id, 
-            patient_id=data.patient_id
+    q_ids = list(dict.fromkeys(q.question_id for q in data.questions))
+    question_map = {}
+    if q_ids:
+        ph = ",".join(["%s"] * len(q_ids))
+        rows = await db.query(
+            f"""
+            SELECT QUESTION_ID, QUESTION_TEXT, IS_VITALS_CORRELATED
+            FROM CADENCE.PUBLIC.SCALE_QUESTIONS
+            WHERE SCALE_TYPE = %s AND QUESTION_ID IN ({ph})
+            """,
+            (data.scale_type, *q_ids),
         )
-        
-        return {
-            "success": True, 
-            "session_id": session_id,
-            "message": "Check-in submitted. Embedding pipeline running in background.",
-            "pipeline_status": "processing"
-        }
-        
+        question_map = {r["QUESTION_ID"]: r for r in rows}
+
+    insert_session = """
+        INSERT INTO CADENCE.PUBLIC.CHECKIN_SESSIONS
+        (PATIENT_ID, CHECKIN_DATE, SCALE_TYPE, SCALE_SCORE,
+         HRV_VALUE, BREATHING_RATE, PULSE_RATE,
+         DISTRESS_RATING, SITUATION_TEXT, COPING_TEXT)
+        VALUES (%s, CURRENT_DATE, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    select_session = """
+        SELECT SESSION_ID FROM CADENCE.PUBLIC.CHECKIN_SESSIONS
+        WHERE PATIENT_ID = %s AND CHECKIN_DATE = CURRENT_DATE
+        ORDER BY COMPLETED_AT DESC LIMIT 1
+    """
+    insert_vital = """
+        INSERT INTO CADENCE.PUBLIC.QUESTION_VITALS
+        (SESSION_ID, PATIENT_ID, QUESTION_ID, QUESTION_TEXT, SCALE_TYPE,
+         RESPONSE_VALUE, HRV_AT_QUESTION, IS_VITALS_CORRELATED, CAPTURED_AT)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+    """
+    update_schedule = """
+        UPDATE CADENCE.PUBLIC.CHECKIN_SCHEDULE
+        SET COMPLETED = TRUE, COMPLETED_AT = CURRENT_TIMESTAMP
+        WHERE PATIENT_ID = %s AND SCHEDULED_DATE = CURRENT_DATE
+    """
+    session_params = (
+        data.patient_id,
+        data.scale_type,
+        data.scale_score,
+        data.hrv,
+        data.breathing_rate,
+        data.pulse_rate,
+        data.distress,
+        data.situation,
+        data.coping,
+    )
+
+    def write(conn):
+        cur = conn.cursor()
+        try:
+            cur.execute(insert_session, session_params)
+            cur.execute(select_session, (data.patient_id,))
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=500, detail="Failed to get session_id")
+            cols = [d[0] for d in cur.description]
+            session_id = dict(zip(cols, row))["SESSION_ID"]
+
+            vitals_batch = []
+            for q in data.questions:
+                info = question_map.get(q.question_id)
+                if not info:
+                    continue
+                vitals_batch.append(
+                    (
+                        session_id,
+                        data.patient_id,
+                        q.question_id,
+                        info["QUESTION_TEXT"],
+                        data.scale_type,
+                        q.response,
+                        q.hrv_at_question,
+                        info["IS_VITALS_CORRELATED"],
+                    )
+                )
+            if vitals_batch:
+                cur.executemany(insert_vital, vitals_batch)
+            cur.execute(update_schedule, (data.patient_id,))
+            return session_id
+        finally:
+            cur.close()
+
+    try:
+        session_id = await db.run_transaction(write)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Submit failed: {str(e)}")
+
+    background_tasks.add_task(
+        process_checkin_pipeline,
+        session_id=session_id,
+        patient_id=data.patient_id,
+    )
+
+    return {
+        "success": True,
+        "session_id": session_id,
+        "message": "Check-in submitted. Embedding pipeline running in background.",
+        "pipeline_status": "processing",
+    }
 
 
 @router.get("/{session_id}/status")
