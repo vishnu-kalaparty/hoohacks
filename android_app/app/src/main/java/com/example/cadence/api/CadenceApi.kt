@@ -21,6 +21,11 @@ interface CadenceApi {
 
     // ── Patients ──────────────────────────────────────────────────────
 
+    @GET("patients/")
+    fun listPatients(
+        @Query("therapist_id") therapistId: Int? = null
+    ): Call<PatientListResponse>
+
     @GET("patients/get-questions/{patient_id}")
     fun getPatientQuestions(
         @Path("patient_id") patientId: Int

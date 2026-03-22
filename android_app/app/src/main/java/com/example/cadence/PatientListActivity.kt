@@ -87,13 +87,13 @@ class PatientListActivity : AppCompatActivity() {
     }
 
     private fun loadPatients() {
-        if (therapistId <= 0) {
-            patients = fallbackPatients
-            displayPatients()
-            return
+        val call = if (therapistId > 0) {
+            RetrofitClient.api.getPatients(therapistId)
+        } else {
+            RetrofitClient.api.listPatients()
         }
 
-        RetrofitClient.api.getPatients(therapistId).enqueue(object : Callback<PatientListResponse> {
+        call.enqueue(object : Callback<PatientListResponse> {
             override fun onResponse(call: Call<PatientListResponse>, response: Response<PatientListResponse>) {
                 if (response.isSuccessful && response.body() != null) {
                     val apiPatients = response.body()!!.patients
