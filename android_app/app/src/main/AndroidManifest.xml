@@ -4,10 +4,12 @@
     package="com.example.cadence">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.camera" />
 
     <application
         android:allowBackup="true"
+        android:usesCleartextTraffic="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -49,6 +51,9 @@
             android:exported="false" />
         <activity
             android:name=".PatientAnalyticsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SessionDetailActivity"
             android:exported="false" />
 
         <!-- FileProvider for PDF export sharing -->

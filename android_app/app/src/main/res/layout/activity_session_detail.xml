@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F9FAFB"
+    tools:context=".SessionDetailActivity">
+
+    <!-- Top bar with gradient -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/gradient_background"
+        android:paddingTop="12dp"
+        android:paddingBottom="20dp"
+        android:paddingHorizontal="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="6dp"
+                android:src="@drawable/ic_back_arrow"
+                android:contentDescription="Back"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Session Detail"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:src="@drawable/avatar_placeholder"
+                android:contentDescription="Patient"
+                android:layout_marginEnd="12dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvDetailName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Patient"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/tvDetailDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Date"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvDetailScoreBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="6dp"
+                android:background="@drawable/score_circle_teal" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="24dp">
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginVertical="24dp"
+                android:visibility="gone" />
+
+            <!-- Vitals overview card -->
+            <LinearLayout
+                android:id="@+id/vitalsCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/chart_card_background"
+                android:padding="16dp"
+                android:elevation="2dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Vitals Snapshot"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- HRV -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="HRV"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_gray" />
+                        <TextView
+                            android:id="@+id/tvHrv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="–"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/icon_teal" />
+                    </LinearLayout>
+
+                    <!-- Breathing -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Breathing"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_gray" />
+                        <TextView
+                            android:id="@+id/tvBreathing"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="–"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/icon_teal" />
+                    </LinearLayout>
+
+                    <!-- Distress -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Distress"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_gray" />
+                        <TextView
+                            android:id="@+id/tvDistress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="–"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/icon_teal" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Situation card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/chart_card_background"
+                android:padding="16dp"
+                android:elevation="2dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Situation"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tvSituation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No situation recorded"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_dark"
+                    android:lineSpacingExtra="3dp" />
+            </LinearLayout>
+
+            <!-- Coping card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/chart_card_background"
+                android:padding="16dp"
+                android:elevation="2dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Coping Strategies"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tvCoping"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No coping strategies recorded"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_dark"
+                    android:lineSpacingExtra="3dp" />
+            </LinearLayout>
+
+            <!-- Question responses section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/screening_section_background"
+                android:elevation="2dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvQuestionsTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Question Responses"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_dark" />
+
+                    <TextView
+                        android:id="@+id/tvDetailScoreSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:background="@drawable/score_circle_teal"
+                        android:gravity="center"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="6dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/questionsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

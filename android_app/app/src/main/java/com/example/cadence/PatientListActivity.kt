@@ -16,11 +16,12 @@ import androidx.core.view.WindowInsetsCompat
 class PatientListActivity : AppCompatActivity() {
 
     data class Patient(
+        val id: Int,
         val name: String,
         val date: String,
-        val screeningType: String, // "PHQ-9" or "GAD-7"
+        val screeningType: String,
         val score: Int,
-        val severity: String // "Critical", "Severe", "Moderate", "Mild"
+        val severity: String
     )
 
     private lateinit var chips: List<TextView>
@@ -29,14 +30,14 @@ class PatientListActivity : AppCompatActivity() {
     private var activeChip: String = "All"
 
     private val patients = listOf(
-        Patient("Sarah Mitchell", "Jan 15, 2025 • 2:30 PM", "PHQ-9", 22, "Critical"),
-        Patient("James Anderson", "Jan 15, 2025 • 1:15 PM", "GAD-7", 16, "Severe"),
-        Patient("Emily Rodriguez", "Jan 15, 2025 • 11:45 AM", "PHQ-9", 12, "Moderate"),
-        Patient("Michael Chen", "Jan 14, 2025 • 3:00 PM", "GAD-7", 8, "Mild"),
-        Patient("Lisa Thompson", "Jan 14, 2025 • 10:30 AM", "PHQ-9", 19, "Severe"),
-        Patient("David Park", "Jan 13, 2025 • 4:15 PM", "GAD-7", 14, "Moderate"),
-        Patient("Anna Williams", "Jan 13, 2025 • 9:00 AM", "PHQ-9", 24, "Critical"),
-        Patient("Robert Garcia", "Jan 12, 2025 • 2:00 PM", "GAD-7", 5, "Mild")
+        Patient(1, "Sarah Mitchell", "Jan 15, 2025 • 2:30 PM", "PHQ-9", 22, "Critical"),
+        Patient(2, "James Anderson", "Jan 15, 2025 • 1:15 PM", "GAD-7", 16, "Severe"),
+        Patient(3, "Emily Rodriguez", "Jan 15, 2025 • 11:45 AM", "PHQ-9", 12, "Moderate"),
+        Patient(4, "Michael Chen", "Jan 14, 2025 • 3:00 PM", "GAD-7", 8, "Mild"),
+        Patient(5, "Lisa Thompson", "Jan 14, 2025 • 10:30 AM", "PHQ-9", 19, "Severe"),
+        Patient(6, "David Park", "Jan 13, 2025 • 4:15 PM", "GAD-7", 14, "Moderate"),
+        Patient(7, "Anna Williams", "Jan 13, 2025 • 9:00 AM", "PHQ-9", 24, "Critical"),
+        Patient(8, "Robert Garcia", "Jan 12, 2025 • 2:00 PM", "GAD-7", 5, "Mild")
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -141,6 +142,7 @@ class PatientListActivity : AppCompatActivity() {
             // View Analytics button
             cardView.findViewById<View>(R.id.btnViewAnalytics).setOnClickListener {
                 val intent = Intent(this, PatientAnalyticsActivity::class.java)
+                intent.putExtra("patient_id", patient.id)
                 intent.putExtra("patient_name", patient.name)
                 intent.putExtra("patient_date", patient.date)
                 intent.putExtra("screening_type", patient.screeningType)

@@ -84,3 +84,56 @@ async def get_question_hrv_trends(patient_id: int) -> list:
     """, (patient_id,))
     
     return rows
+
+
+async def get_similar_sessions(patient_id: int, session_id: int, limit: int = 20) -> list:
+    """
+    Find historically similar sessions using Snowflake Cortex vector cosine similarity.
+    Compares the given session's SITUATION_VECTOR against all other sessions for the patient.
+    """
+    db = SnowflakeDB()
+
+    rows = await db.query("""
+        SELECT 
+            cs2.SESSION_ID,
+            cs2.CHECKIN_DATE,
+            cs2.SCALE_SCORE,
+            cs2.HRV_VALUE,
+            cs2.BREATHING_RATE,
+            cs2.DISTRESS_RATING,
+            cs2.SITUATION_TEXT,
+            cs2.COPING_TEXT,
+            cs2.SCALE_TYPE,
+            VECTOR_COSINE_SIMILARITY(cs1.SITUATION_VECTOR, cs2.SITUATION_VECTOR) AS SIMILARITY
+        FROM CADENCE.PUBLIC.CHECKIN_SESSIONS cs1
+        JOIN CADENCE.PUBLIC.CHECKIN_SESSIONS cs2
+            ON cs2.PATIENT_ID = cs1.PATIENT_ID
+            AND cs2.SESSION_ID != cs1.SESSION_ID
+            AND cs2.SITUATION_VECTOR IS NOT NULL
+        WHERE cs1.SESSION_ID = %s
+            AND cs1.PATIENT_ID = %s
+            AND cs1.SITUATION_VECTOR IS NOT NULL
+        ORDER BY SIMILARITY DESC
+        LIMIT %s
+    """, (session_id, patient_id, limit))
+
+    return rows
+
+
+async def get_latest_session(patient_id: int) -> dict:
+    """Get the most recent session for a patient."""
+    db = SnowflakeDB()
+
+    row = await db.query("""
+        SELECT 
+            SESSION_ID, CHECKIN_DATE, SCALE_TYPE, SCALE_SCORE,
+            HRV_VALUE, BREATHING_RATE, DISTRESS_RATING,
+            SITUATION_TEXT, COPING_TEXT,
+            SITUATION_VECTOR IS NOT NULL AS HAS_EMBEDDING
+        FROM CADENCE.PUBLIC.CHECKIN_SESSIONS
+        WHERE PATIENT_ID = %s
+        ORDER BY CHECKIN_DATE DESC
+        LIMIT 1
+    """, (patient_id,))
+
+    return row[0] if row else None
