@@ -12,14 +12,15 @@ import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.presagetech.smartspectra.SmartSpectraSdk
 
 class ScreeningActivity : AppCompatActivity() {
 
@@ -29,35 +30,27 @@ class ScreeningActivity : AppCompatActivity() {
     private lateinit var questions: Array<String>
     private lateinit var screeningTitle: String
 
-    // Presage vitals storage per question
-    private lateinit var heartRates: DoubleArray
-    private lateinit var respRates: DoubleArray
-    private var latestHeartRate: Double = 0.0
-    private var latestRespRate: Double = 0.0
-    private var presageInitialized = false
-    private lateinit var presageLauncher: ActivityResultLauncher<Intent>
-
     companion object {
         private val PHQ9_QUESTIONS = arrayOf(
-            "Over the last week, how often have you been bothered by little interest or pleasure in doing things?",
-            "Over the last week, how often have you been bothered by feeling down, depressed, or hopeless?",
-            "Over the last week, how often have you been bothered by trouble falling or staying asleep, or sleeping too much?",
-            "Over the last week, how often have you been bothered by feeling tired or having little energy?",
-            "Over the last week, how often have you been bothered by poor appetite or overeating?",
-            "Over the last week, how often have you been bothered by feeling bad about yourself — or that you are a failure or have let yourself or your family down?",
-            "Over the last week, how often have you been bothered by trouble concentrating on things, such as reading the newspaper or watching television?",
-            "Over the last week, how often have you been bothered by moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual?",
-            "Over the last week, how often have you been bothered by thoughts that you would be better off dead, or of hurting yourself in some way?"
+            "Over the last 2 weeks, how often have you been bothered by little interest or pleasure in doing things?",
+            "Over the last 2 weeks, how often have you been bothered by feeling down, depressed, or hopeless?",
+            "Over the last 2 weeks, how often have you been bothered by trouble falling or staying asleep, or sleeping too much?",
+            "Over the last 2 weeks, how often have you been bothered by feeling tired or having little energy?",
+            "Over the last 2 weeks, how often have you been bothered by poor appetite or overeating?",
+            "Over the last 2 weeks, how often have you been bothered by feeling bad about yourself — or that you are a failure or have let yourself or your family down?",
+            "Over the last 2 weeks, how often have you been bothered by trouble concentrating on things, such as reading the newspaper or watching television?",
+            "Over the last 2 weeks, how often have you been bothered by moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual?",
+            "Over the last 2 weeks, how often have you been bothered by thoughts that you would be better off dead, or of hurting yourself in some way?"
         )
 
         private val GAD7_QUESTIONS = arrayOf(
-            "Over the last week, how often have you been bothered by feeling nervous, anxious, or on edge?",
-            "Over the last week, how often have you been bothered by not being able to stop or control worrying?",
-            "Over the last week, how often have you been bothered by worrying too much about different things?",
-            "Over the last week, how often have you been bothered by trouble relaxing?",
-            "Over the last week, how often have you been bothered by being so restless that it is hard to sit still?",
-            "Over the last week, how often have you been bothered by becoming easily annoyed or irritable?",
-            "Over the last week, how often have you been bothered by feeling afraid, as if something awful might happen?"
+            "Over the last 2 weeks, how often have you been bothered by feeling nervous, anxious, or on edge?",
+            "Over the last 2 weeks, how often have you been bothered by not being able to stop or control worrying?",
+            "Over the last 2 weeks, how often have you been bothered by worrying too much about different things?",
+            "Over the last 2 weeks, how often have you been bothered by trouble relaxing?",
+            "Over the last 2 weeks, how often have you been bothered by being so restless that it is hard to sit still?",
+            "Over the last 2 weeks, how often have you been bothered by becoming easily annoyed or irritable?",
+            "Over the last 2 weeks, how often have you been bothered by feeling afraid, as if something awful might happen?"
         )
     }
 
@@ -80,27 +73,6 @@ class ScreeningActivity : AppCompatActivity() {
             insets
         }
 
-        // Register Presage activity result launcher
-        presageLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { _ ->
-            // Recording finished — store the latest vitals for the current question
-            heartRates[currentQuestion] = latestHeartRate
-            respRates[currentQuestion] = latestRespRate
-            Log.d("ScreeningActivity", "Q${currentQuestion + 1} vitals — HR: $latestHeartRate, RR: $latestRespRate")
-
-            // Now advance to next question or finish
-            if (currentQuestion < totalQuestions - 1) {
-                currentQuestion++
-                displayQuestion()
-            } else {
-                finishScreening()
-            }
-        }
-
-        // Initialize Presage SDK
-        initPresageSdk()
-
         // Load correct question set based on intent extra
         val screeningType = intent.getStringExtra(SelectScreeningActivity.EXTRA_SCREENING_TYPE)
             ?: SelectScreeningActivity.TYPE_PHQ9
@@ -114,8 +86,6 @@ class ScreeningActivity : AppCompatActivity() {
         }
         totalQuestions = questions.size
         scores = IntArray(totalQuestions)
-        heartRates = DoubleArray(totalQuestions)
-        respRates = DoubleArray(totalQuestions)
 
         tvQuestionCounter = findViewById(R.id.tvQuestionCounter)
         tvQuestionLabel = findViewById(R.id.tvQuestionLabel)
@@ -149,11 +119,18 @@ class ScreeningActivity : AppCompatActivity() {
             answerCards[i].setOnClickListener { selectAnswer(i) }
         }
 
-        // Submit button — launches Presage recording, then advances on return
+        // Submit button
         btnSubmit.setOnClickListener { submitAnswer() }
 
         // Display initial question
         displayQuestion()
+
+        // Start camera preview - TEMPORARILY DISABLED FOR DEBUGGING
+        // if (checkCameraPermission()) {
+        //     startCamera()
+        // } else {
+        //     requestCameraPermission()
+        // }
     }
 
     private fun displayQuestion() {
@@ -204,19 +181,6 @@ class ScreeningActivity : AppCompatActivity() {
     private fun submitAnswer() {
         if (selectedAnswer < 0) return
 
-        // Launch Presage camera to record vitals for this question
-        if (presageInitialized && checkCameraPermission()) {
-            launchPresageRecording()
-        } else if (!checkCameraPermission()) {
-            requestCameraPermission()
-        } else {
-            // SDK not initialized — skip vitals and advance
-            Log.w("ScreeningActivity", "Presage not initialized, advancing without vitals")
-            advanceQuestion()
-        }
-    }
-
-    private fun advanceQuestion() {
         if (currentQuestion < totalQuestions - 1) {
             currentQuestion++
             displayQuestion()
@@ -225,62 +189,31 @@ class ScreeningActivity : AppCompatActivity() {
         }
     }
 
-    private fun initPresageSdk() {
-        try {
-            SmartSpectraSdk.initialize(this.applicationContext)
-            val sdk = SmartSpectraSdk.getInstance()
-            sdk.setApiKey("ExO2F77fHN9MPSCXnmTt67TcPrKi0tc5aqSJK63Z")
-            sdk.setMeasurementDuration(30.0)
-
-            sdk.setEdgeMetricsObserver { metrics ->
-                runOnUiThread {
-                    Log.d("ScreeningActivity", "Presage Metrics: $metrics")
-                    val metricsStr = metrics.toString()
-                    latestHeartRate = extractDoubleValue(metricsStr, "pulseRate")
-                    latestRespRate = extractDoubleValue(metricsStr, "breathingRate")
-                }
-            }
-            presageInitialized = true
-            Log.d("ScreeningActivity", "Presage SDK initialized successfully")
-        } catch (e: Exception) {
-            Log.e("ScreeningActivity", "Presage SDK init failed", e)
-            presageInitialized = false
-        }
-    }
-
-    private fun launchPresageRecording() {
-        try {
-            val intent = Intent()
-            intent.setClassName(this, "com.presagetech.smartspectra.ui.SmartSpectraActivity")
-            presageLauncher.launch(intent)
-        } catch (e: Exception) {
-            Log.e("ScreeningActivity", "Presage launch failed", e)
-            Toast.makeText(this, "Recording failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            advanceQuestion()
-        }
-    }
-
-    private fun extractDoubleValue(data: String, key: String): Double {
-        return try {
-            val start = data.indexOf(key) + key.length + 1
-            var end = data.indexOf(",", start)
-            if (end == -1) end = data.indexOf(")", start)
-            if (end == -1) end = data.length
-            data.substring(start, end).replace("=", "").trim().toDouble()
-        } catch (e: Exception) {
-            0.0
-        }
-    }
-
     private fun finishScreening() {
-        val intent = Intent(this, FollowUpQuestionsActivity::class.java)
+        val intent = Intent(this, BreatheActivity::class.java)
         intent.putExtra("total_score", scores.sum())
         intent.putExtra("screening_type",
             getIntent().getStringExtra(SelectScreeningActivity.EXTRA_SCREENING_TYPE) ?: SelectScreeningActivity.TYPE_PHQ9)
-        intent.putExtra("heart_rates", heartRates)
-        intent.putExtra("resp_rates", respRates)
         startActivity(intent)
         finish()
+    }
+
+    private fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        cameraProviderFuture.addListener({
+            try {
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = Preview.Builder().build()
+                val previewView = findViewById<PreviewView>(R.id.cameraPreview)
+                preview.setSurfaceProvider(previewView.surfaceProvider)
+
+                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview)
+            } catch (e: Exception) {
+                Log.e("ScreeningActivity", "Camera bind failed", e)
+            }
+        }, ContextCompat.getMainExecutor(this))
     }
 
     private fun checkCameraPermission(): Boolean {
@@ -296,10 +229,9 @@ class ScreeningActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(rc: Int, p: Array<out String>, g: IntArray) {
         super.onRequestPermissionsResult(rc, p, g)
         if (rc == 101 && g.isNotEmpty() && g[0] == PackageManager.PERMISSION_GRANTED) {
-            // Permission granted — now launch the Presage recording
-            launchPresageRecording()
+            startCamera()
         } else {
-            Toast.makeText(this, "Camera permission required for vitals capture", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Camera permission required for screening", Toast.LENGTH_LONG).show()
         }
     }
 }
