@@ -119,7 +119,7 @@ class ResultsActivity : AppCompatActivity() {
             QuestionResponseItem(
                 question_id = questionIds[i],
                 response = scoresArray.getOrElse(i) { 0 },
-                hrv_at_question = hrvArray?.getOrElse(i) { null }?.let { if (it > 0) it else null }
+                hrv_at_question = hrvArray?.getOrElse(i) { 0.0 }.takeIf { it != null && it > 0.0 }
             )
         }
 

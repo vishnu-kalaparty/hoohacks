@@ -133,7 +133,7 @@ class ScreeningActivity : AppCompatActivity() {
                         Log.d(TAG, "Buffer received for Q${currentQuestion + 1}")
 
                         if (buffer.hasPulse() && buffer.pulse.rateCount > 0) {
-                            val pulse = buffer.pulse.getRate(buffer.pulse.rateCount - 1).value
+                            val pulse = buffer.pulse.getRate(buffer.pulse.rateCount - 1).value.toDouble()
                             lastPulseRate = pulse
                             totalPulse += pulse
                             hrvPerQuestion[currentQuestion] = pulse
@@ -141,7 +141,7 @@ class ScreeningActivity : AppCompatActivity() {
                         }
 
                         if (buffer.hasBreathing() && buffer.breathing.rateCount > 0) {
-                            val resp = buffer.breathing.getRate(buffer.breathing.rateCount - 1).value
+                            val resp = buffer.breathing.getRate(buffer.breathing.rateCount - 1).value.toDouble()
                             lastBreathingRate = resp
                             totalBreathing += resp
                             Log.i(TAG, "RR for Q${currentQuestion + 1}: $resp")
