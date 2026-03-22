@@ -1,8 +1,12 @@
 """Therapist dashboard routes with trends."""
 import asyncio
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPBearer
 from app.core.database import get_db, SnowflakeDB
+from app.core.auth import get_current_user
 from app.services.embedding_pipeline import get_session_trends, get_question_hrv_trends
+
+security = HTTPBearer()
 
 router = APIRouter(
     prefix="/dashboard",

@@ -1,9 +1,16 @@
 """Therapist-managed check-in schedule (insert into CHECKIN_SCHEDULE)."""
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPBearer
 from app.core.database import get_db, SnowflakeDB
 from app.models.schemas import TherapistScheduleInsert
 
-router = APIRouter(prefix="/therapists", tags=["therapist-schedule"])
+security = HTTPBearer()
+
+router = APIRouter(
+    prefix="/therapists",
+    tags=["therapist-schedule"],
+    dependencies=[Depends(security)]
+)
 
 
 @router.post("/{therapist_id}/schedule")

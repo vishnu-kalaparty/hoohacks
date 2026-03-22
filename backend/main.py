@@ -4,11 +4,14 @@ Auris Backend - MVP (Async + Dependency Injection + Auth0)
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.core.config import  PROJECT_NAME, VERSION, ALLOWED_HOSTS, AUTH0_CONFIG
 from app.middleware.audit import AuditLogMiddleware
 from app.core.auth import get_current_user
 from app.routers import patients, checkins, dashboard, therapist_schedule, auth
 import logging
+
+security = HTTPBearer()
 
 logger = logging.getLogger(__name__)
 
