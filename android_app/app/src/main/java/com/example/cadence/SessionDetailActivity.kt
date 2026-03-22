@@ -18,6 +18,12 @@ import com.example.cadence.api.PlaceholderData
 import com.example.cadence.api.QuestionVital
 import com.example.cadence.api.RetrofitClient
 import com.example.cadence.api.SessionDetailResponse
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -118,7 +124,137 @@ class SessionDetailActivity : AppCompatActivity() {
         })
     }
 
+    private fun setupHrvChart(questions: List<QuestionVital>) {
+        val chart = findViewById<BarChart>(R.id.hrvBarChart)
+        val withHrv = questions.filter { it.hrvAtQuestion != null }
+        if (withHrv.isEmpty()) {
+            chart.visibility = View.GONE
+            return
+        }
+
+        val entries = mutableListOf<BarEntry>()
+        val labels = mutableListOf<String>()
+        val colors = mutableListOf<Int>()
+
+        val teal = Color.parseColor("#1E8B8B")
+        val gray = Color.parseColor("#9CA3AF")
+        val red = Color.parseColor("#DC2626")
+
+        for ((i, q) in questions.withIndex()) {
+            val hrv = q.hrvAtQuestion ?: 0.0
+            entries.add(BarEntry(i.toFloat(), hrv.toFloat()))
+            labels.add(q.questionId)
+
+            val isLow = hrv < 35
+            colors.add(
+                when {
+                    isLow -> red
+                    q.isVitalsCorrelated == true -> teal
+                    else -> gray
+                }
+            )
+        }
+
+        val dataSet = BarDataSet(entries, "HRV").apply {
+            setColors(colors)
+            valueTextSize = 9f
+            valueTextColor = Color.parseColor("#374151")
+        }
+
+        chart.apply {
+            data = BarData(dataSet).apply { barWidth = 0.6f }
+            description.isEnabled = false
+            legend.isEnabled = false
+            setTouchEnabled(false)
+            setDrawGridBackground(false)
+            animateY(500)
+
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                valueFormatter = IndexAxisValueFormatter(labels)
+                granularity = 1f
+                textSize = 10f
+                textColor = Color.parseColor("#6B7280")
+                setDrawGridLines(false)
+            }
+            axisLeft.apply {
+                textSize = 10f
+                textColor = Color.parseColor("#6B7280")
+                setDrawGridLines(true)
+                gridColor = Color.parseColor("#E5E7EB")
+                axisMinimum = 0f
+            }
+            axisRight.isEnabled = false
+            invalidate()
+        }
+    }
+
+    private fun setupScoreChart(questions: List<QuestionVital>) {
+        val chart = findViewById<BarChart>(R.id.scoreBarChart)
+        if (questions.isEmpty()) {
+            chart.visibility = View.GONE
+            return
+        }
+
+        val entries = mutableListOf<BarEntry>()
+        val labels = mutableListOf<String>()
+        val colors = mutableListOf<Int>()
+
+        for ((i, q) in questions.withIndex()) {
+            val score = (q.responseValue ?: 0).toFloat()
+            entries.add(BarEntry(i.toFloat(), score))
+            labels.add(q.questionId)
+
+            colors.add(
+                when (q.responseValue ?: 0) {
+                    0 -> Color.parseColor("#D1FAE5")
+                    1 -> Color.parseColor("#6EE7B7")
+                    2 -> Color.parseColor("#F59E0B")
+                    else -> Color.parseColor("#DC2626")
+                }
+            )
+        }
+
+        val dataSet = BarDataSet(entries, "Score").apply {
+            setColors(colors)
+            valueTextSize = 10f
+            valueTextColor = Color.parseColor("#374151")
+        }
+
+        chart.apply {
+            data = BarData(dataSet).apply { barWidth = 0.6f }
+            description.isEnabled = false
+            legend.isEnabled = false
+            setTouchEnabled(false)
+            setDrawGridBackground(false)
+            animateY(500)
+
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                valueFormatter = IndexAxisValueFormatter(labels)
+                granularity = 1f
+                textSize = 10f
+                textColor = Color.parseColor("#6B7280")
+                setDrawGridLines(false)
+            }
+            axisLeft.apply {
+                textSize = 10f
+                textColor = Color.parseColor("#6B7280")
+                setDrawGridLines(true)
+                gridColor = Color.parseColor("#E5E7EB")
+                axisMinimum = 0f
+                axisMaximum = 3.5f
+                granularity = 1f
+            }
+            axisRight.isEnabled = false
+            invalidate()
+        }
+    }
+
     private fun displayQuestions(questions: List<QuestionVital>) {
+        setupHrvChart(questions)
+        setupScoreChart(questions)
+
         val container = findViewById<LinearLayout>(R.id.questionsContainer)
         container.removeAllViews()
 
