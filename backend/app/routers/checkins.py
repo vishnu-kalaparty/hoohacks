@@ -1,4 +1,5 @@
 """Check-in routes with embedding pipeline."""
+
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from app.core.database import get_db, SnowflakeDB
 from app.core.auth import get_current_user
@@ -151,14 +152,12 @@ async def get_checkin_status(
     session_id: int,
     db: SnowflakeDB = Depends(get_db)
 ):
-    """Get check-in processing status (embedding & cluster)."""
+    """Get check-in processing status."""
     result = await db.fetch_one("""
         SELECT 
             SESSION_ID,
             SITUATION_TEXT IS NOT NULL AS HAS_TEXT,
-            SITUATION_VECTOR IS NOT NULL AS HAS_EMBEDDING,
-            SITUATION_CLUSTER IS NOT NULL AS HAS_CLUSTER,
-            SITUATION_CLUSTER
+            SITUATION_VECTOR IS NOT NULL AS HAS_EMBEDDING
         FROM CADENCE.PUBLIC.CHECKIN_SESSIONS
         WHERE SESSION_ID = %s
     """, (session_id,))
@@ -170,9 +169,7 @@ async def get_checkin_status(
         "session_id": session_id,
         "has_situation_text": result["HAS_TEXT"],
         "has_embedding": result["HAS_EMBEDDING"],
-        "has_cluster": result["HAS_CLUSTER"],
-        "cluster_label": result["SITUATION_CLUSTER"],
-        "pipeline_complete": result["HAS_EMBEDDING"] and result["HAS_CLUSTER"]
+        "pipeline_complete": result["HAS_EMBEDDING"],
     }
 
 
@@ -182,10 +179,7 @@ async def manual_run_pipeline(
     db: SnowflakeDB = Depends(get_db),
     user: dict = Depends(get_current_user)
 ):
-    """
-    Manually trigger embedding pipeline (for retry or admin).
-    """
-    # Get patient_id
+    """Manually trigger embedding pipeline (for retry or admin)."""
     result = await db.fetch_one("""
         SELECT PATIENT_ID FROM CADENCE.PUBLIC.CHECKIN_SESSIONS WHERE SESSION_ID = %s
     """, (session_id,))
@@ -193,16 +187,9 @@ async def manual_run_pipeline(
     if not result:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    patient_id = result["PATIENT_ID"]
+    success = await process_checkin_pipeline(session_id, result["PATIENT_ID"])
     
-    # Run pipeline
-    cluster_label = await process_checkin_pipeline(session_id, patient_id)
-    
-    if cluster_label:
-        return {
-            "success": True,
-            "session_id": session_id,
-            "cluster_label": cluster_label
-        }
+    if success:
+        return {"success": True, "session_id": session_id}
     else:
         raise HTTPException(status_code=500, detail="Pipeline failed")
