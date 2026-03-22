@@ -26,6 +26,52 @@
         <activity
             android:name=".CameraTestActivity"
             android:exported="false" />
+        <activity
+            android:name=".ConsentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SelectScreeningActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ScreeningActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BreatheActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ResultsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TherapistLoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PatientListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PatientAnalyticsActivity"
+            android:exported="false" />
+
+        <!-- FileProvider for PDF export sharing -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- Disable SmartSpectra auto-init to prevent crash on x86_64 emulators -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="com.presagetech.smartspectra.SmartSpectraInitializer"
+                tools:node="remove" />
+        </provider>
 
         <!-- Register the SDK's camera activity with a Material Components theme -->
         <activity

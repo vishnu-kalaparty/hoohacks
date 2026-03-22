@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light"
+    android:fillViewport="true"
+    tools:context=".BreatheActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header with Auris logo and camera preview -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="12dp">
+
+            <!-- Logo icon -->
+            <FrameLayout
+                android:id="@+id/breatheLogoContainer"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/icon_circle_teal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_heartbeat"
+                    android:contentDescription="Logo" />
+            </FrameLayout>
+
+            <!-- App name -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_title"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/icon_teal"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/breatheLogoContainer"
+                app:layout_constraintTop_toTopOf="@id/breatheLogoContainer"
+                app:layout_constraintBottom_toBottomOf="@id/breatheLogoContainer" />
+
+            <!-- Camera preview -->
+            <FrameLayout
+                android:id="@+id/breatheCameraContainer"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/camera_preview_background"
+                android:clipChildren="true"
+                android:clipToPadding="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.camera.view.PreviewView
+                    android:id="@+id/breatheCameraPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/recording_dot" />
+            </FrameLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Countdown timer -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_gravity="end"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp">
+
+            <FrameLayout
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/countdown_background">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_clock"
+                    android:contentDescription="Timer" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tvCountdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:layout_marginStart="6dp" />
+        </LinearLayout>
+
+        <!-- Breathing circle -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp"
+            android:gravity="center">
+
+            <!-- Outer ring -->
+            <FrameLayout
+                android:id="@+id/breatheOuter"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:background="@drawable/breathe_circle_outer">
+
+                <!-- Middle ring -->
+                <FrameLayout
+                    android:id="@+id/breatheMiddle"
+                    android:layout_width="160dp"
+                    android:layout_height="160dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/breathe_circle_middle">
+
+                    <!-- Inner circle with icon -->
+                    <FrameLayout
+                        android:id="@+id/breatheInner"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/breathe_circle_inner">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:src="@drawable/ic_lungs"
+                                android:layout_marginBottom="4dp"
+                                android:contentDescription="Breathe" />
+
+                            <TextView
+                                android:id="@+id/tvBreatheLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/breathe_label"
+                                android:textSize="14sp"
+                                android:textColor="@color/white"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+                </FrameLayout>
+            </FrameLayout>
+        </FrameLayout>
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/breathe_title"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_dark"
+            android:textAlignment="center"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Description -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/breathe_body"
+            android:textSize="14sp"
+            android:textColor="@color/text_gray"
+            android:textAlignment="center"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Vitals capture card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/vitals_card_background"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="24dp"
+            android:padding="20dp">
+
+            <!-- Capturing status -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp">
+
+                <View
+                    android:id="@+id/statusDot"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/status_dot_green"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/tvCapturingStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/breathe_capturing"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_dark" />
+            </LinearLayout>
+
+            <!-- Vitals icons row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <!-- Heart Rate -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_heartbeat"
+                        android:layout_marginBottom="4dp"
+                        android:contentDescription="Heart Rate" />
+
+                    <TextView
+                        android:id="@+id/tvBreatheHeartRate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/breathe_heart_rate"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_gray" />
+                </LinearLayout>
+
+                <!-- HRV -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_hrv"
+                        android:layout_marginBottom="4dp"
+                        android:contentDescription="HRV" />
+
+                    <TextView
+                        android:id="@+id/tvBreatheHrv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/breathe_hrv"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_gray" />
+                </LinearLayout>
+
+                <!-- Blink Rate -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_blink"
+                        android:layout_marginBottom="4dp"
+                        android:contentDescription="Blink Rate" />
+
+                    <TextView
+                        android:id="@+id/tvBreatheBlink"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/breathe_blink_rate"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_gray" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Page dots indicator -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp">
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/dot_teal"
+                android:alpha="0.3"
+                android:layout_marginEnd="6dp" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/dot_teal"
+                android:alpha="0.3"
+                android:layout_marginEnd="6dp" />
+
+            <View
+                android:layout_width="20dp"
+                android:layout_height="8dp"
+                android:background="@drawable/progress_bar_fill"
+                android:layout_marginEnd="6dp" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/dot_teal"
+                android:alpha="0.3"
+                android:layout_marginEnd="6dp" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/dot_teal"
+                android:alpha="0.3" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
