@@ -212,14 +212,6 @@
 
                 invalidate()
             }
-            findViewById<View>(R.id.btnSimilarSessions).setOnClickListener {
-                val ssIntent = Intent(this, SimilarSessionsActivity::class.java)
-                ssIntent.putExtra("patient_name", patientName)
-                ssIntent.putExtra("patient_id", getIntent().getIntExtra("patient_id", -1))
-                ssIntent.putExtra("patient_date", patientDate)
-                ssIntent.putExtra("severity", severityLabel)
-                startActivity(ssIntent)
-            }
         }
 
         // ── Session cards ─────────────────────────────────────────────────────
