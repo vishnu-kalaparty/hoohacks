@@ -2,41 +2,56 @@ package com.example.cadence
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.cadence.api.ApiPatient
+import com.example.cadence.api.PatientListResponse
+import com.example.cadence.api.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class PatientListActivity : AppCompatActivity() {
 
+    companion object {
+        private const val TAG = "PatientList"
+        private const val PREFS_NAME = "cadence_auth"
+    }
+
     data class Patient(
+        val id: Int,
         val name: String,
         val date: String,
-        val screeningType: String, // "PHQ-9" or "GAD-7"
+        val screeningType: String,
         val score: Int,
-        val severity: String // "Critical", "Severe", "Moderate", "Mild"
+        val severity: String
     )
 
     private lateinit var chips: List<TextView>
     private lateinit var patientCardsContainer: LinearLayout
     private lateinit var tvTotalCount: TextView
     private var activeChip: String = "All"
+    private var therapistId: Int = -1
 
-    private val patients = listOf(
-        Patient("Sarah Mitchell", "Jan 15, 2025 • 2:30 PM", "PHQ-9", 22, "Critical"),
-        Patient("James Anderson", "Jan 15, 2025 • 1:15 PM", "GAD-7", 16, "Severe"),
-        Patient("Emily Rodriguez", "Jan 15, 2025 • 11:45 AM", "PHQ-9", 12, "Moderate"),
-        Patient("Michael Chen", "Jan 14, 2025 • 3:00 PM", "GAD-7", 8, "Mild"),
-        Patient("Lisa Thompson", "Jan 14, 2025 • 10:30 AM", "PHQ-9", 19, "Severe"),
-        Patient("David Park", "Jan 13, 2025 • 4:15 PM", "GAD-7", 14, "Moderate"),
-        Patient("Anna Williams", "Jan 13, 2025 • 9:00 AM", "PHQ-9", 24, "Critical"),
-        Patient("Robert Garcia", "Jan 12, 2025 • 2:00 PM", "GAD-7", 5, "Mild")
+    private var patients: List<Patient> = emptyList()
+
+    private val fallbackPatients = listOf(
+        Patient(1, "Sarah Mitchell", "Jan 15, 2025 • 2:30 PM", "PHQ-9", 22, "Critical"),
+        Patient(2, "James Anderson", "Jan 15, 2025 • 1:15 PM", "GAD-7", 16, "Severe"),
+        Patient(3, "Emily Rodriguez", "Jan 15, 2025 • 11:45 AM", "PHQ-9", 12, "Moderate"),
+        Patient(4, "Michael Chen", "Jan 14, 2025 • 3:00 PM", "GAD-7", 8, "Mild"),
+        Patient(5, "Lisa Thompson", "Jan 14, 2025 • 10:30 AM", "PHQ-9", 19, "Severe"),
+        Patient(6, "David Park", "Jan 13, 2025 • 4:15 PM", "GAD-7", 14, "Moderate"),
+        Patient(7, "Anna Williams", "Jan 13, 2025 • 9:00 AM", "PHQ-9", 24, "Critical"),
+        Patient(8, "Robert Garcia", "Jan 12, 2025 • 2:00 PM", "GAD-7", 5, "Mild")
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +64,8 @@ class PatientListActivity : AppCompatActivity() {
             insets
         }
 
+        therapistId = resolveTherapistId()
+        Log.i(TAG, "loadPatients: therapistId=$therapistId")
         patientCardsContainer = findViewById(R.id.patientCardsContainer)
         tvTotalCount = findViewById(R.id.tvTotalCount)
 
@@ -69,7 +86,92 @@ class PatientListActivity : AppCompatActivity() {
             }
         }
 
-        displayPatients()
+        loadPatients()
+    }
+
+    private fun resolveTherapistId(): Int {
+        var id = intent.getIntExtra("therapist_id", -1)
+        if (id <= 0) {
+            id = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getInt("therapist_id", -1)
+        }
+        return if (id <= 0) 1 else id
+    }
+
+    private fun loadPatients() {
+        Log.i(TAG, "GET dashboard/therapists/$therapistId/patients")
+        RetrofitClient.api.getPatients(therapistId).enqueue(object : Callback<PatientListResponse> {
+            override fun onResponse(call: Call<PatientListResponse>, response: Response<PatientListResponse>) {
+                if (response.isSuccessful && response.body() != null) {
+                    val apiPatients = response.body()!!.patients
+                    patients = apiPatients.map { it.toLocalPatient() }
+                    if (patients.isEmpty()) {
+                        Log.w(TAG, "API returned empty list, using fallback")
+                        patients = fallbackPatients
+                    }
+                } else {
+                    val err = try {
+                        response.errorBody()?.string()?.take(500)
+                    } catch (_: Exception) {
+                        null
+                    }
+                    Log.w(TAG, "API returned ${response.code()}, body=${response.body()} err=$err — using fallback")
+                    patients = fallbackPatients
+                    if (response.code() in 400..599) {
+                        Toast.makeText(
+                            this@PatientListActivity,
+                            "Could not load patients (${response.code()})",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+                displayPatients()
+            }
+
+            override fun onFailure(call: Call<PatientListResponse>, t: Throwable) {
+                Log.w(TAG, "API unreachable, using fallback", t)
+                Toast.makeText(
+                    this@PatientListActivity,
+                    "Network error — ${t.message?.take(80)}",
+                    Toast.LENGTH_LONG
+                ).show()
+                patients = fallbackPatients
+                displayPatients()
+            }
+        })
+    }
+
+    private fun ApiPatient.toLocalPatient(): Patient {
+        val score = (latestScore ?: 0.0).toInt()
+        val scale = assignedScale ?: "PHQ-9"
+        val severity = getSeverity(score, scale)
+        val dateStr = latestCheckin ?: "No check-ins"
+        return Patient(
+            id = patientId,
+            name = name,
+            date = dateStr,
+            screeningType = scale,
+            score = score,
+            severity = severity
+        )
+    }
+
+    private fun getSeverity(score: Int, scaleType: String): String {
+        return if (scaleType == "PHQ-9") {
+            when {
+                score >= 20 -> "Critical"
+                score >= 15 -> "Severe"
+                score >= 10 -> "Moderate"
+                score >= 5 -> "Mild"
+                else -> "Mild"
+            }
+        } else {
+            when {
+                score >= 15 -> "Severe"
+                score >= 10 -> "Moderate"
+                score >= 5 -> "Mild"
+                else -> "Mild"
+            }
+        }
     }
 
     private fun updateChipStates() {
@@ -100,14 +202,12 @@ class PatientListActivity : AppCompatActivity() {
             cardView.findViewById<TextView>(R.id.tvPatientName).text = patient.name
             cardView.findViewById<TextView>(R.id.tvPatientDate).text = patient.date
 
-            // Score label and value
             val tvScoreLabel = cardView.findViewById<TextView>(R.id.tvScoreLabel)
             val tvScoreValue = cardView.findViewById<TextView>(R.id.tvScoreValue)
             tvScoreLabel.text = if (patient.screeningType == "PHQ-9")
                 getString(R.string.plist_phq9_score) else getString(R.string.plist_gad7_score)
             tvScoreValue.text = patient.score.toString()
 
-            // Color the score based on severity
             val scoreColor = when (patient.severity) {
                 "Critical" -> 0xFFDC2626.toInt()
                 "Severe" -> 0xFFEA580C.toInt()
@@ -116,7 +216,6 @@ class PatientListActivity : AppCompatActivity() {
             }
             tvScoreValue.setTextColor(scoreColor)
 
-            // Severity badge
             val tvBadge = cardView.findViewById<TextView>(R.id.tvSeverityBadge)
             tvBadge.text = patient.severity
             when (patient.severity) {
@@ -138,9 +237,9 @@ class PatientListActivity : AppCompatActivity() {
                 }
             }
 
-            // View Analytics button
             cardView.findViewById<View>(R.id.btnViewAnalytics).setOnClickListener {
                 val intent = Intent(this, PatientAnalyticsActivity::class.java)
+                intent.putExtra("patient_id", patient.id)
                 intent.putExtra("patient_name", patient.name)
                 intent.putExtra("patient_date", patient.date)
                 intent.putExtra("screening_type", patient.screeningType)
