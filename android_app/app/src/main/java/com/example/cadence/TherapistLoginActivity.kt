@@ -51,27 +51,12 @@ class TherapistLoginActivity : AppCompatActivity() {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            // Validate email
             if (email.isEmpty()) {
                 etEmail.error = "Email is required"
-                etEmail.requestFocus()
                 return@setOnClickListener
             }
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                etEmail.error = "Please enter a valid email address"
-                etEmail.requestFocus()
-                return@setOnClickListener
-            }
-
-            // Validate password
             if (password.isEmpty()) {
                 etPassword.error = "Password is required"
-                etPassword.requestFocus()
-                return@setOnClickListener
-            }
-            if (password.length < 6) {
-                etPassword.error = "Password must be at least 6 characters"
-                etPassword.requestFocus()
                 return@setOnClickListener
             }
 

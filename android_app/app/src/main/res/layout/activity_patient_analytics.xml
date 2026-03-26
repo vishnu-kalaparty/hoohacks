@@ -331,107 +331,6 @@
 
             </LinearLayout>
 
-            <!-- Follow-Up Responses Card -->
-            <LinearLayout
-                android:id="@+id/followUpAnalyticsCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/chart_card_background"
-                android:elevation="2dp"
-                android:layout_marginBottom="16dp"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Follow-Up Responses"
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_dark"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- Distress Level -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Today\'s Distress Level"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_muted"
-                    android:layout_marginBottom="4dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="14dp">
-
-                    <TextView
-                        android:id="@+id/tvAnalyticsDistress"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_dark"
-                        android:layout_marginEnd="8dp" />
-
-                    <TextView
-                        android:id="@+id/tvAnalyticsDistressLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_gray" />
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:layout_marginBottom="14dp" />
-
-                <!-- Stressful Event -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Stressful Event Today"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_muted"
-                    android:layout_marginBottom="4dp" />
-
-                <TextView
-                    android:id="@+id/tvAnalyticsStressful"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@color/text_dark"
-                    android:layout_marginBottom="14dp" />
-
-                <!-- Divider -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:layout_marginBottom="14dp" />
-
-                <!-- Coping Response -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="How They Handled It"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_muted"
-                    android:layout_marginBottom="4dp" />
-
-                <TextView
-                    android:id="@+id/tvAnalyticsCoping"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@color/text_dark" />
-            </LinearLayout>
-
             <!-- AI-Generated Clinical Insights Card -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -529,7 +428,7 @@
                         android:text="@string/insights_export_pdf"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:textColor="@color/icon_teal" />
+                        android:textColor="@color/text_dark" />
                 </LinearLayout>
 
                 <!-- Add Session Notes button -->

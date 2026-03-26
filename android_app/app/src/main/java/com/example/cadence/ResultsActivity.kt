@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -73,33 +72,6 @@ class ResultsActivity : AppCompatActivity() {
             scoreBarFill.setBackgroundResource(
                 if (isPHQ9) R.drawable.score_bar_fill_teal else R.drawable.score_bar_fill_blue
             )
-        }
-
-        // Follow-up answers
-        val distressLevel = intent.getIntExtra("followup_distress", -1)
-        val stressful = intent.getBooleanExtra("followup_stressful", false)
-        val stressDesc = intent.getStringExtra("followup_stress_desc") ?: ""
-        val coping = intent.getStringExtra("followup_coping") ?: ""
-
-        if (distressLevel >= 1) {
-            val followUpCard = findViewById<LinearLayout>(R.id.followUpCard)
-            followUpCard.visibility = View.VISIBLE
-
-            findViewById<TextView>(R.id.tvFollowUpDistress).text = "$distressLevel / 10"
-
-            val stressText = if (stressful) {
-                if (stressDesc.isNotBlank()) "Yes — $stressDesc" else "Yes"
-            } else {
-                "No"
-            }
-            findViewById<TextView>(R.id.tvFollowUpStressful).text = stressText
-
-            if (coping.isNotBlank()) {
-                findViewById<TextView>(R.id.tvFollowUpCopingLabel).visibility = View.VISIBLE
-                val tvCoping = findViewById<TextView>(R.id.tvFollowUpCoping)
-                tvCoping.visibility = View.VISIBLE
-                tvCoping.text = coping
-            }
         }
 
         btnDone.setOnClickListener {

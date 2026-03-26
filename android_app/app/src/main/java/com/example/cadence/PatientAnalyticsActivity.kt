@@ -189,9 +189,6 @@ class PatientAnalyticsActivity : AppCompatActivity() {
         // Populate questions
         populateQuestions()
 
-        // Populate follow-up responses (sample data for therapist view)
-        populateFollowUp(score)
-
         // Populate AI-Generated Clinical Insights
         populateInsights(screeningType, score, maxScore, discrepancies)
 
@@ -840,50 +837,6 @@ class PatientAnalyticsActivity : AppCompatActivity() {
         }
 
         dialog.show()
-    }
-
-    private fun populateFollowUp(score: Int) {
-        // Generate sample follow-up data based on score severity
-        val distress = when {
-            score >= 20 -> 9
-            score >= 15 -> 7
-            score >= 10 -> 6
-            score >= 5 -> 4
-            else -> 2
-        }
-        val distressLabel = when {
-            distress >= 8 -> "High distress"
-            distress >= 5 -> "Moderate distress"
-            else -> "Low distress"
-        }
-        val distressColor = when {
-            distress >= 8 -> 0xFFDC2626.toInt()
-            distress >= 5 -> 0xFFEA580C.toInt()
-            else -> 0xFF059669.toInt()
-        }
-
-        findViewById<TextView>(R.id.tvAnalyticsDistress).apply {
-            text = "$distress / 10"
-            setTextColor(distressColor)
-        }
-        findViewById<TextView>(R.id.tvAnalyticsDistressLabel).text = distressLabel
-
-        // Sample stressful event
-        if (score >= 10) {
-            findViewById<TextView>(R.id.tvAnalyticsStressful).text =
-                "Yes — Had a disagreement with a family member"
-        } else {
-            findViewById<TextView>(R.id.tvAnalyticsStressful).text = "No"
-        }
-
-        // Sample coping response
-        val copingSample = when {
-            score >= 15 -> "Tried to sleep it off but couldn't stop thinking about it"
-            score >= 10 -> "Went for a walk and listened to music"
-            score >= 5 -> "Talked to a friend about it"
-            else -> "Took some time to relax and read"
-        }
-        findViewById<TextView>(R.id.tvAnalyticsCoping).text = copingSample
     }
 
     private fun getSeverityLabel(type: String, score: Int): String {

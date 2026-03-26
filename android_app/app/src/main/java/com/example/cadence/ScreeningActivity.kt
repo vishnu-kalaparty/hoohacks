@@ -130,8 +130,8 @@ class ScreeningActivity : AppCompatActivity() {
                     }
                 }
             }
-        } catch (e: Exception) {
-            Log.e("PresageTest", "Setup failed", e)
+        } catch (e: Throwable) {
+            Log.e("PresageTest", "Setup failed: ${e.javaClass.simpleName} - ${e.message}", e)
         }
     }
 
