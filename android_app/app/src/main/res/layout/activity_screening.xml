@@ -42,7 +42,6 @@
                 android:orientation="vertical"
                 android:layout_marginStart="8dp"
                 app:layout_constraintStart_toEndOf="@id/btnScreeningBack"
-                app:layout_constraintEnd_toStartOf="@id/cameraContainer"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
@@ -64,30 +63,30 @@
             </LinearLayout>
 
             <!-- Camera preview container -->
-            <FrameLayout
-                android:id="@+id/cameraContainer"
-                android:layout_width="100dp"
-                android:layout_height="120dp"
-                android:background="@drawable/camera_preview_background"
-                android:clipChildren="true"
-                android:clipToPadding="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+<!--            <FrameLayout-->
+<!--                android:id="@+id/cameraContainer"-->
+<!--                android:layout_width="100dp"-->
+<!--                android:layout_height="120dp"-->
+<!--                android:background="@drawable/camera_preview_background"-->
+<!--                android:clipChildren="true"-->
+<!--                android:clipToPadding="true"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent">-->
 
-                <androidx.camera.view.PreviewView
-                    android:id="@+id/cameraPreview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+<!--                <androidx.camera.view.PreviewView-->
+<!--                    android:id="@+id/cameraPreview"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent" />-->
 
-                <!-- Recording indicator dot -->
-                <View
-                    android:id="@+id/recordingDot"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:layout_gravity="top|end"
-                    android:layout_margin="6dp"
-                    android:background="@drawable/recording_dot" />
-            </FrameLayout>
+<!--                &lt;!&ndash; Recording indicator dot &ndash;&gt;-->
+<!--                <View-->
+<!--                    android:id="@+id/recordingDot"-->
+<!--                    android:layout_width="10dp"-->
+<!--                    android:layout_height="10dp"-->
+<!--                    android:layout_gravity="top|end"-->
+<!--                    android:layout_margin="6dp"-->
+<!--                    android:background="@drawable/recording_dot" />-->
+<!--            </FrameLayout>-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

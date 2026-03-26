@@ -124,7 +124,7 @@ class ScreeningActivity : AppCompatActivity() {
         try {
             SmartSpectraSdk.initialize(this.applicationContext)
             sdk = SmartSpectraSdk.getInstance()
-            sdk?.setApiKey("q3aQxmrSky5XLokq8Js0Q3OcTkzsJ6244fz3gzLw")
+            sdk?.setApiKey("NN6ukOCTQ25H9RlQbqHlo3z7vJSQLCLX4mSm1yx0")
             sdk?.setMeasurementDuration(20.0)
 
             sdk?.setMetricsBufferObserver { buffer ->

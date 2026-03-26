@@ -53,28 +53,28 @@
                 app:layout_constraintBottom_toBottomOf="@id/breatheLogoContainer" />
 
             <!-- Camera preview -->
-            <FrameLayout
-                android:id="@+id/breatheCameraContainer"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="@drawable/camera_preview_background"
-                android:clipChildren="true"
-                android:clipToPadding="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+<!--            <FrameLayout-->
+<!--                android:id="@+id/breatheCameraContainer"-->
+<!--                android:layout_width="56dp"-->
+<!--                android:layout_height="56dp"-->
+<!--                android:background="@drawable/camera_preview_background"-->
+<!--                android:clipChildren="true"-->
+<!--                android:clipToPadding="true"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent">-->
 
-                <androidx.camera.view.PreviewView
-                    android:id="@+id/breatheCameraPreview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+<!--                <androidx.camera.view.PreviewView-->
+<!--                    android:id="@+id/breatheCameraPreview"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent" />-->
 
-                <View
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_gravity="top|end"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/recording_dot" />
-            </FrameLayout>
+<!--                <View-->
+<!--                    android:layout_width="8dp"-->
+<!--                    android:layout_height="8dp"-->
+<!--                    android:layout_gravity="top|end"-->
+<!--                    android:layout_margin="4dp"-->
+<!--                    android:background="@drawable/recording_dot" />-->
+<!--            </FrameLayout>-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

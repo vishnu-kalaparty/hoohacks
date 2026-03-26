@@ -18,7 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
+//import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -143,8 +143,8 @@ class BreatheActivity : AppCompatActivity() {
             try {
                 val cameraProvider = cameraProviderFuture.get()
                 val preview = Preview.Builder().build()
-                val previewView = findViewById<PreviewView>(R.id.breatheCameraPreview)
-                preview.setSurfaceProvider(previewView.surfaceProvider)
+//                val previewView = findViewById<PreviewView>(R.id.breatheCameraPreview)
+//                preview.setSurfaceProvider(previewView.surfaceProvider)
 
                 val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
