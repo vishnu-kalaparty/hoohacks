@@ -153,8 +153,8 @@ class ScreeningActivity : AppCompatActivity() {
                     }
                 }
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Presage setup failed", e)
+        } catch (e: Throwable) {
+            Log.e(TAG, "Setup failed: ${e.javaClass.simpleName} - ${e.message}", e)
         }
     }
 

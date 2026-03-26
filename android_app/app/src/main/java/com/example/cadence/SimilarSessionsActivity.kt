@@ -33,10 +33,10 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class PatientAnalyticsActivity : AppCompatActivity() {
+class SimilarSessionsActivity : AppCompatActivity() {
 
     companion object {
-        private const val TAG = "PatientAnalytics"
+        private const val TAG = "SimilarSessions"
     }
 
     private lateinit var lineChart: LineChart
@@ -52,7 +52,7 @@ class PatientAnalyticsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_patient_analytics)
+        setContentView(R.layout.activity_similar_sessions)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -205,14 +205,6 @@ class PatientAnalyticsActivity : AppCompatActivity() {
 
             invalidate()
         }
-        findViewById<View>(R.id.btnSimilarSessions).setOnClickListener {
-            val ssIntent = Intent(this, SimilarSessionsActivity::class.java)
-            ssIntent.putExtra("patient_name", patientName)
-            ssIntent.putExtra("patient_id", getIntent().getIntExtra("patient_id", -1))
-            ssIntent.putExtra("patient_date", patientDate)
-            ssIntent.putExtra("severity", severityLabel)
-            startActivity(ssIntent)
-        }
     }
 
     // ── Session cards ─────────────────────────────────────────────────────
@@ -260,7 +252,7 @@ class PatientAnalyticsActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         })
 
-        val scoreText = "Score: ${session.scaleScore ?: "–"}"
+        val scoreText = "Score: ${session.scaleScore ?: "\u2013"}"
         topRow.addView(TextView(this).apply {
             text = scoreText
             textSize = 14f
@@ -314,7 +306,7 @@ class PatientAnalyticsActivity : AppCompatActivity() {
 
         if (!session.situationText.isNullOrBlank()) {
             val situationPreview = if (session.situationText.length > 80)
-                session.situationText.take(80) + "…" else session.situationText
+                session.situationText.take(80) + "\u2026" else session.situationText
             card.addView(TextView(this).apply {
                 text = situationPreview
                 textSize = 12f
@@ -327,7 +319,7 @@ class PatientAnalyticsActivity : AppCompatActivity() {
         }
 
         card.addView(TextView(this).apply {
-            text = "Tap to view full session →"
+            text = "Tap to view full session \u2192"
             textSize = 11f
             setTextColor(Color.parseColor("#1E8B8B"))
         })
