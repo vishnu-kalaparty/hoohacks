@@ -95,7 +95,7 @@
     <LinearLayout
         android:id="@+id/btnViewAnalytics"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="44dp"
         android:orientation="horizontal"
         android:gravity="center"
         android:background="@drawable/button_analytics"
@@ -106,6 +106,7 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:src="@drawable/ic_analytics"
+            android:tint="@color/white"
             android:layout_marginEnd="6dp"
             android:contentDescription="Analytics" />
 
@@ -115,7 +116,7 @@
             android:text="@string/plist_view_analytics"
             android:textSize="13sp"
             android:textStyle="bold"
-            android:textColor="@color/icon_teal" />
+            android:textColor="@color/white" />
     </LinearLayout>
 
 </LinearLayout>
