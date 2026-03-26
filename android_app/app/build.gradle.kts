@@ -57,6 +57,8 @@ dependencies {
     // For Snowflake API calls later
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     
     // CameraX for live camera preview
     implementation("androidx.camera:camera-core:1.3.1")
