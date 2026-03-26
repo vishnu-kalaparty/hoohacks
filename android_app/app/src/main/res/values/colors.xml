@@ -4,8 +4,19 @@
     <color name="white">#FFFFFFFF</color>
     <color name="gradient_start">#1E8B8B</color>
     <color name="gradient_end">#3B82C8</color>
+
+    <!-- Button Colors -->
     <color name="button_primary">#FFFFFF</color>
-    <color name="button_secondary">#4A9FD8</color>
+    <color name="button_primary_pressed">#E0E0E0</color>
+    <color name="button_secondary">#115E59</color>
+    <color name="button_secondary_pressed">#0D4F4A</color>
+    <color name="button_cta">#FF6B6B</color>
+    <color name="button_cta_pressed">#E85555</color>
+
+    <!-- New Dark Button Theme -->
+    <color name="button_dark">#1A1A2E</color>
+    <color name="button_dark_pressed">#000000</color>
+
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#E0F2F7</color>
     <color name="icon_teal">#1E8B8B</color>

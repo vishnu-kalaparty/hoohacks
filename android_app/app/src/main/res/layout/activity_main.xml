@@ -59,15 +59,16 @@
         app:layout_constraintBottom_toTopOf="@id/btnPatient"
         android:layout_marginBottom="48dp" />
 
-    <Button
+    <!-- Primary Action: Dark Theme -->
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnPatient"
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:text="@string/btn_patient"
         android:textSize="16sp"
-        android:textColor="@color/icon_teal"
+        android:textColor="@color/white"
         android:textStyle="bold"
-        android:background="@drawable/button_primary"
+        android:background="@drawable/button_dark_selector"
         android:drawableStart="@drawable/ic_user"
         android:drawablePadding="8dp"
         android:paddingStart="24dp"
@@ -80,15 +81,16 @@
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="16dp" />
 
-    <Button
+    <!-- Secondary Action: Secondary Theme -->
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnTherapist"
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:text="@string/btn_therapist"
         android:textSize="16sp"
-        android:textColor="@color/text_primary"
+        android:textColor="@color/white"
         android:textStyle="bold"
-        android:background="@drawable/button_secondary"
+        android:background="@drawable/button_secondary_selector"
         android:drawableStart="@drawable/ic_therapist"
         android:drawablePadding="8dp"
         android:paddingStart="24dp"

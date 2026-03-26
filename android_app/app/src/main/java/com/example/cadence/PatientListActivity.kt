@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -27,6 +28,8 @@ class PatientListActivity : AppCompatActivity() {
     private lateinit var patientCardsContainer: LinearLayout
     private lateinit var tvTotalCount: TextView
     private var activeChip: String = "All"
+    private var currentFilter: String = "All" // All, PHQ-9, GAD-7
+    private var currentSort: String = "Date" // Date, Score, Name
 
     private val patients = listOf(
         Patient("Sarah Mitchell", "Jan 15, 2025 • 2:30 PM", "PHQ-9", 22, "Critical"),
@@ -69,7 +72,67 @@ class PatientListActivity : AppCompatActivity() {
             }
         }
 
+        // Filter button
+        findViewById<View>(R.id.btnFilter).setOnClickListener {
+            showFilterDialog()
+        }
+
+        // Sort button
+        findViewById<View>(R.id.btnSort).setOnClickListener {
+            showSortDialog()
+        }
+
         displayPatients()
+    }
+
+    private fun showFilterDialog() {
+        val options = arrayOf("All Screenings", "PHQ-9 Only", "GAD-7 Only")
+        val currentIndex = when (currentFilter) {
+            "All" -> 0
+            "PHQ-9" -> 1
+            "GAD-7" -> 2
+            else -> 0
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Filter by Screening Type")
+            .setSingleChoiceItems(options, currentIndex) { dialog, which ->
+                currentFilter = when (which) {
+                    0 -> "All"
+                    1 -> "PHQ-9"
+                    2 -> "GAD-7"
+                    else -> "All"
+                }
+                displayPatients()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showSortDialog() {
+        val options = arrayOf("Most Recent", "Highest Score", "Name (A-Z)")
+        val currentIndex = when (currentSort) {
+            "Date" -> 0
+            "Score" -> 1
+            "Name" -> 2
+            else -> 0
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Sort Patients")
+            .setSingleChoiceItems(options, currentIndex) { dialog, which ->
+                currentSort = when (which) {
+                    0 -> "Date"
+                    1 -> "Score"
+                    2 -> "Name"
+                    else -> "Date"
+                }
+                displayPatients()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun updateChipStates() {
@@ -88,8 +151,21 @@ class PatientListActivity : AppCompatActivity() {
     private fun displayPatients() {
         patientCardsContainer.removeAllViews()
 
-        val filtered = if (activeChip == "All") patients
+        // Apply severity filter (chips)
+        var filtered = if (activeChip == "All") patients
         else patients.filter { it.severity == activeChip }
+
+        // Apply screening type filter
+        if (currentFilter != "All") {
+            filtered = filtered.filter { it.screeningType == currentFilter }
+        }
+
+        // Apply sorting
+        filtered = when (currentSort) {
+            "Score" -> filtered.sortedByDescending { it.score }
+            "Name" -> filtered.sortedBy { it.name }
+            else -> filtered // Date is already in chronological order
+        }
 
         tvTotalCount.text = filtered.size.toString()
 

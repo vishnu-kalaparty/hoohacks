@@ -59,6 +59,11 @@ class BreatheActivity : AppCompatActivity() {
                 resultsIntent.putExtra("total_score", intent.getIntExtra("total_score", 0))
                 resultsIntent.putExtra("screening_type",
                     intent.getStringExtra("screening_type") ?: SelectScreeningActivity.TYPE_PHQ9)
+                // Pass through follow-up answers
+                resultsIntent.putExtra("followup_distress", intent.getIntExtra("followup_distress", -1))
+                resultsIntent.putExtra("followup_stressful", intent.getBooleanExtra("followup_stressful", false))
+                resultsIntent.putExtra("followup_stress_desc", intent.getStringExtra("followup_stress_desc") ?: "")
+                resultsIntent.putExtra("followup_coping", intent.getStringExtra("followup_coping") ?: "")
                 startActivity(resultsIntent)
                 finish()
             }

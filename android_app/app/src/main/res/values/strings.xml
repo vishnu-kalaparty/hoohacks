@@ -26,6 +26,7 @@
     <string name="consent_privacy_policy">Privacy Policy</string>
     <string name="consent_terms">Terms of Service</string>
     <string name="consent_support">Support</string>
+    <string name="consent_text">This application uses your device\'s camera to measure heart rate and respiratory rate through photoplethysmography (PPG) during the screening process. No video or images are stored — only the extracted physiological signals are retained.\n\nYour screening responses and vital sign data are transmitted securely to your therapist\'s dashboard. All data is encrypted in transit and at rest. This tool is intended as a clinical screening aid and does not constitute a medical diagnosis.\n\nBy tapping \"Accept and Continue,\" you acknowledge that you have read and understood this disclosure and consent to data collection as described above.</string>
 
     <string name="select_screening_title">Choose Your Screening</string>
     <string name="select_screening_subtitle">Select the assessment you\'d like to take</string>
@@ -115,4 +116,19 @@
     <string name="insights_disclaimer">Clinical decision support only. Therapist judgment takes precedence.</string>
     <string name="insights_export_pdf">Export PDF</string>
     <string name="insights_add_notes">Add Session Notes</string>
+
+    <!-- Follow-up Questions -->
+    <string name="followup_title">Follow-Up Questions</string>
+    <string name="followup_step">Almost done — 3 quick questions</string>
+    <string name="followup_subtitle">These help your therapist understand your day better.</string>
+    <string name="followup_q1_label">QUESTION 1 OF 3</string>
+    <string name="followup_q1">How distressing was today on a scale of 1 to 10?</string>
+    <string name="followup_q2_label">QUESTION 2 OF 3</string>
+    <string name="followup_q2">Did something stressful happen today?</string>
+    <string name="followup_q2_hint">Briefly describe what happened…</string>
+    <string name="followup_q3_label">QUESTION 3 OF 3</string>
+    <string name="followup_q3">How did you handle it?</string>
+    <string name="followup_q3_hint">Describe in one sentence…</string>
+    <string name="followup_next">Next</string>
+    <string name="followup_submit">Continue</string>
 </resources>

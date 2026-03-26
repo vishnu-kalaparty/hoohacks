@@ -45,6 +45,9 @@
             android:name=".TherapistLoginActivity"
             android:exported="false" />
         <activity
+            android:name=".FollowUpQuestionsActivity"
+            android:exported="false" />
+        <activity
             android:name=".PatientListActivity"
             android:exported="false" />
         <activity
