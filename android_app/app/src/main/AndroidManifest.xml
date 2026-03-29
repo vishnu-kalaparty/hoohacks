@@ -74,15 +74,15 @@
         </provider>
 
         <!-- Disable SmartSpectra auto-init to prevent crash on x86_64 emulators -->
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge">
-            <meta-data
-                android:name="com.presagetech.smartspectra.SmartSpectraInitializer"
-                tools:node="remove" />
-        </provider>
+<!--        <provider-->
+<!--            android:name="androidx.startup.InitializationProvider"-->
+<!--            android:authorities="${applicationId}.androidx-startup"-->
+<!--            android:exported="false"-->
+<!--            tools:node="merge">-->
+<!--            <meta-data-->
+<!--                android:name="com.presagetech.smartspectra.SmartSpectraInitializer"-->
+<!--                tools:node="remove" />-->
+<!--        </provider>-->
 
         <!-- Register the SDK's camera activity with a Material Components theme -->
         <activity

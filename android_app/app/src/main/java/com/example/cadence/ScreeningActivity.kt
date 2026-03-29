@@ -124,7 +124,7 @@ class ScreeningActivity : AppCompatActivity() {
         try {
             SmartSpectraSdk.initialize(this.applicationContext)
             sdk = SmartSpectraSdk.getInstance()
-            sdk?.setApiKey("NN6ukOCTQ25H9RlQbqHlo3z7vJSQLCLX4mSm1yx0")
+            sdk?.setApiKey("bJiNrgTbOliRbS2Nl3Et8LQ8WAICThi2Jcr3LpXb")
             sdk?.setMeasurementDuration(20.0)
 
             sdk?.setMetricsBufferObserver { buffer ->
@@ -153,8 +153,8 @@ class ScreeningActivity : AppCompatActivity() {
                     }
                 }
             }
-        } catch (e: Throwable) {
-            Log.e(TAG, "Setup failed: ${e.javaClass.simpleName} - ${e.message}", e)
+        } catch (e: Exception) {
+            Log.e(TAG, "Presage setup failed", e)
         }
     }
 
