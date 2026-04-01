@@ -1,14 +1,29 @@
 # Auris: Between Session Intelligence
 
-A full-stack web application for PTSD patient monitoring between therapy sessions.
+A full-stack system for PTSD patient monitoring between therapy sessions.
+**Authentication is handled with [Auth0](https://auth0.com)** (JWT validation on
+the API; SPA and native clients use the Auth0 SDK).
 
 ## Overview
 
 **Auris** helps therapists monitor patient well-being between sessions through:
+
 - Regular check-ins with clinical scales (PHQ-9, GAD-7)
-- Continuous vitals monitoring during check-ins
-- AI-powered situation clustering and trend analysis
-- Secure, HIPAA-compliant data storage in Snowflake
+- Vitals-aware screening flows
+- Embeddings and similarity tooling for session insights (see backend services)
+- Snowflake-backed storage with optional Cortex-related SQL in the repo
+
+## What’s in this repository
+
+| Area            | Description                                                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Backend**     | FastAPI app with **Auth0**-protected routes, Snowflake access, audit middleware                                         |
+| **Android app** | Kotlin client (`android_app/`) for screening, therapist flows, and API calls with bearer tokens                         |
+| **Docs**        | [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md), [`AUTH0_SETUP.md`](AUTH0_SETUP.md), root [`.env.example`](.env.example) |
+
+There is no React or Streamlit app in this tree; the
+[`.env.example`](.env.example) still lists typical local URLs if you add a web
+frontend later.
 
 ## Architecture
 
@@ -16,299 +31,139 @@ A full-stack web application for PTSD patient monitoring between therapy session
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              AURIS PLATFORM                                  │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                   │
-│  │   React      │    │   FastAPI    │    │  Streamlit   │                   │
-│  │   Frontend   │◄──►│   Backend    │◄──►│  Dashboard   │                   │
-│  │  (Patient)   │    │   (Auth0)    │    │ (Therapist)  │                   │
-│  └──────────────┘    └──────┬───────┘    └──────────────┘                   │
-│                             │                                                │
-│                             ▼                                                │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                   │
-│  │ SmartSpectra │    │   Snowflake  │    │    Twilio    │                   │
-│  │    SDK       │    │  (Cortex AI) │    │    SMS       │                   │
-│  │  (Vitals)    │    │  (Database)  │    │ (Reminders)  │                   │
-│  └──────────────┘    └──────────────┘    └──────────────┘                   │
-└─────────────────────────────────────────────────────────────────────────────┘
+│  ┌──────────────┐                                                           │
+│  │   Presage    │                                                           │
+│  │ SmartSpectra │  (camera / vitals SDK on device)                           │
+│  └──────▲───────┘                                                           │
+│  vitals │                                                                   │
+│  ┌──────┴───────┐         ┌──────────────┐         ┌──────────────┐           │
+│  │   Android    │  HTTPS  │   FastAPI    │         │  Snowflake   │           │
+│  │   (Kotlin)   │◄───────►│   Backend    │◄───────►│  (Database)  │           │
+│  │   Auris app  │         │  + Auth0 JWT │         │              │           │
+│  └──────┬───────┘         └──────┬───────┘         └──────────────┘           │
+│         │                        │                                           │
+│         └────────────────────────┼──────────────── Auth0 (login / tokens)      │
+│                                  │                                           │
+└──────────────────────────────────┴──────────────────────────────────────────┘
 ```
 
-## Tech Stack
+Optional integrations (configured via env when used): Twilio (SMS)
 
-| Component | Technology |
-|-----------|------------|
-| Frontend | React + Auth0 React SDK |
-| Backend | FastAPI (Python) |
-| Database | Snowflake + Cortex AI |
-| Vitals | SmartSpectra SDK (Presage Technologies) |
-| Notifications | Twilio SMS |
-| Dashboard | Streamlit |
-| Auth | Auth0 |
+## Tech stack
 
-## Project Structure
+| Layer  | Technology                                                     |
+| ------ | -------------------------------------------------------------- |
+| API    | FastAPI (Python), **Auth0** (JWT + `/auth/config` for clients) |
+| Data   | Snowflake                                                      |
+| Mobile | Android (Kotlin), Retrofit                                     |
+| Docs   | FastAPI OpenAPI (`/docs`, `/redoc`)                            |
+
+## Project structure
 
 ```
-auris/
-├── backend/                 # FastAPI Backend
+hoohacks/
+├── android_app/              # Android client (package com.example.cadence, app name "Auris")
+├── backend/
+│   ├── main.py               # FastAPI entrypoint (uvicorn main:app)
+│   ├── requirements.txt
 │   ├── app/
-│   │   ├── api/v1/         # API endpoints
-│   │   ├── core/           # Auth, config, database
-│   │   ├── schemas/        # Pydantic models
-│   │   └── services/       # Business logic
-│   ├── tests/              # Test suite
-│   └── requirements.txt
-├── frontend/               # React Frontend
-│   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── pages/          # Page components
-│   │   └── contexts/       # Auth context
-│   └── package.json
-├── dashboard/              # Streamlit Therapist Dashboard
-│   └── app.py
-├── snowflake/              # Snowflake SQL Scripts
-│   ├── 01_schema.sql       # Database schema
-│   ├── 02_embedding_pipeline.sql
-│   ├── 03_trend_queries.sql
-│   └── 04_demo_data.sql
+│   │   ├── core/             # Config, Auth0, database
+│   │   ├── middleware/       # Audit logging
+│   │   ├── routers/          # auth, patients, checkins, dashboard, therapists
+│   │   ├── services/         # e.g. embedding pipeline
+│   │   └── models/
+│   └── snowflake/            # SQL scripts (e.g. mock data, audit log)
+├── bridge_api/               # Placeholder (reserved)
+├── API_DOCUMENTATION.md      # Endpoint reference for API consumers
+├── AUTH0_SETUP.md            # Auth0 tenant, API, and env walkthrough
+├── .env.example              # Shared env template (Auth0, Snowflake, optional Twilio/SmartSpectra)
 └── README.md
 ```
 
 ## Prerequisites
 
 - Python 3.9+
-- Node.js 18+
-- Snowflake account
-- Auth0 account
-- Twilio account (for SMS)
-- SmartSpectra SDK access (Presage Technologies)
+- Android Studio (for the mobile app)
+- Snowflake account and credentials
+- **Auth0** account (application + API as in [`AUTH0_SETUP.md`](AUTH0_SETUP.md))
+- Optional: Twilio, SmartSpectra SDK access (if you enable those features)
 
-## Quick Start
+## Quick start
 
-### 1. Clone and Setup
+### 1. Clone
 
 ```bash
 git clone <repository-url>
-cd auris
+cd hoohacks
 ```
 
-### 2. Auth0 Configuration
+### 2. Environment
 
-#### Create Auth0 Application
+Copy and fill values (Auth0 and Snowflake are required for a full run):
 
-1. Go to [Auth0 Dashboard](https://manage.auth0.com/)
-2. Create a new "Single Page Application" for React frontend
-3. Create a new "Machine to Machine Application" for Streamlit
-4. Create an API with identifier (e.g., `https://auris-api`)
-
-#### Configure Auth0 Roles
-
-1. Go to User Management > Roles
-2. Create two roles: `patient` and `therapist`
-3. Assign roles to users as needed
-
-#### Auth0 Environment Variables
-
-Backend `.env`:
-```
-AUTH0_DOMAIN=your-domain.auth0.com
-AUTH0_API_AUDIENCE=https://auris-api
-AUTH0_CLIENT_ID=your-client-id
-AUTH0_CLIENT_SECRET=your-client-secret
+```bash
+cp .env.example .env
 ```
 
-Frontend `.env`:
-```
-REACT_APP_AUTH0_DOMAIN=your-domain.auth0.com
-REACT_APP_AUTH0_CLIENT_ID=your-spa-client-id
-REACT_APP_AUTH0_AUDIENCE=https://auris-api
-```
+For **Auth0**, follow [`AUTH0_SETUP.md`](AUTH0_SETUP.md). Typical backend
+variables:
 
-### 3. Snowflake Setup
+- `AUTH0_DOMAIN`, `AUTH0_API_AUDIENCE`, `AUTH0_CLIENT_ID`,
+  `AUTH0_CLIENT_SECRET`, `AUTH0_ALGORITHMS`
 
-1. Run the SQL scripts in `snowflake/` folder in order:
-   ```bash
-   # In Snowflake worksheet
-   @01_schema.sql
-   @02_embedding_pipeline.sql
-   @03_trend_queries.sql
-   @04_demo_data.sql
-   ```
+The backend loads configuration from the environment (see
+`backend/app/core/config.py`). Point `ALLOWED_HOSTS` / origins at any web or
+tunnel URL you use.
 
-2. Configure Snowflake credentials in `backend/.env`:
-   ```
-   SNOWFLAKE_USER=your-user
-   SNOWFLAKE_PASSWORD=your-password
-   SNOWFLAKE_ACCOUNT=your-account
-   SNOWFLAKE_DATABASE=AURIS_DB
-   ```
-
-### 4. Backend Setup
+### 3. Backend
 
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your credentials
-uvicorn app.main:app --reload
+# Ensure env vars are set (e.g. export from repo root .env or use your own method)
+uvicorn main:app --reload
 ```
 
-Backend runs at: http://localhost:8000
+- API base: `http://localhost:8000`
+- **Swagger**: `http://localhost:8000/docs`
+- **ReDoc**: `http://localhost:8000/redoc`
 
-### 5. Frontend Setup
+Auth helper for clients: `GET /auth/config` returns Auth0 `domain`, `client_id`,
+and `audience` when the server is configured.
 
-```bash
-cd frontend
-npm install
-cp .env.example .env
-# Edit .env with your Auth0 credentials
-npm start
-```
+### 4. Snowflake
 
-Frontend runs at: http://localhost:3000
+Run SQL under `backend/snowflake/` in your warehouse (order and full set depend
+on your deployment; the repo includes scripts such as `04_mock_data.sql` and
+`05_audit_log.sql`). Align database/schema names with your `.env`.
 
-### 6. Streamlit Dashboard Setup
+### 5. Android app
 
-```bash
-cd dashboard
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your credentials
-streamlit run app.py
-```
+Open `android_app/` in Android Studio. Configure the API base URL where your
+backend is reachable (see `RetrofitClient`); pass a **Bearer** token from Auth0
+after login for protected calls.
 
-Dashboard runs at: http://localhost:8501
+## API documentation
 
-## API Documentation
+- Generated docs: `/docs` and `/redoc` on the running server
+- Human-written reference: [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md)
 
-Once the backend is running, view API docs at:
-- Swagger UI: http://localhost:8000/api/v1/docs
-- ReDoc: http://localhost:8000/api/v1/redoc
+Example routes (no `/api/v1` prefix on the current app): `/auth/me`,
+`/patients`, `/checkins`, `/dashboard`, `/therapists` — see the OpenAPI UI for
+the full list and auth requirements.
 
-### Key Endpoints
+## Security notes
 
-| Endpoint | Method | Description | Auth |
-|----------|--------|-------------|------|
-| `/api/v1/auth/me` | GET | Get current user | JWT |
-| `/api/v1/patients/me` | GET | Get patient info | Patient |
-| `/api/v1/checkins/` | POST | Submit check-in | Patient |
-| `/api/v1/dashboard/patients/compliance` | GET | Get patient list | Therapist |
-| `/api/v1/dashboard/patients/{id}/brief` | GET | Get patient brief | Therapist |
-
-## User Flows
-
-### Patient Flow
-
-1. Login via Auth0 → Redirected to Patient Dashboard
-2. View next scheduled check-in date
-3. On check-in day: Click "Start Check-in"
-4. **Step 1**: Camera activates for vitals monitoring
-5. **Step 2**: Answer assigned scale (PHQ-9 or GAD-7)
-   - Vitals captured at vitals-correlated questions
-   - 5-second pause for snapshot capture
-6. **Step 3**: Answer 3 additional questions
-7. **Step 4**: Submit check-in
-8. Data processed: embedding + clustering pipeline
-
-### Therapist Flow
-
-1. Login via Auth0 → Redirected to Streamlit Dashboard
-2. View patient list with compliance indicators
-3. Click patient to view Session Brief:
-   - **Section 1**: Weekly overview charts
-   - **Section 2**: Question-level vitals sparklines
-   - **Section 3**: Situation clusters
-   - **Section 4**: Comparison panel with confirmation
-   - **Section 5**: Clinical flags (PHQ-9 Q9)
-   - **Section 6**: AI discussion starter
-
-## Snowflake Schema
-
-### Core Tables
-
-- `patients` - Patient profiles linked to Auth0
-- `therapists` - Therapist profiles linked to Auth0
-- `checkin_sessions` - Check-in records with embeddings
-- `question_vitals` - Question-level vitals snapshots
-- `checkin_schedule` - Scheduled check-ins
-- `scale_questions` - PHQ-9 and GAD-7 reference data
-
-### Embedding Pipeline
-
-1. `SNOWFLAKE.CORTEX.EMBED_TEXT_768('e5-base-v2', situation_text)`
-2. Cosine similarity matching (>0.82 threshold)
-3. Cluster assignment or creation
-4. LAG() window functions for trend computation
-
-## Security
-
-- **Auth0 JWT** validation on all API endpoints
-- **Role-based access**: Patient vs Therapist
-- **PHI encrypted** at rest in Snowflake
-- **No video/audio stored** - only derived vitals values
-- **No automated crisis alerts** - flags for therapist review only
-
-## Demo Data
-
-The system includes 3 demo patients:
-
-1. **Alex Rivera** (PHQ-9) - Improving over 8 weeks, work conflict cluster
-2. **Morgan Chen** (GAD-7) - Stable scores, social anxiety cluster
-3. **Jordan Taylor** (PHQ-9) - Q9 elevated (demonstrates flag feature)
-
-## Development
-
-### Running Tests
-
-```bash
-cd backend
-pytest
-```
-
-### Adding New Features
-
-1. Backend: Add endpoints in `app/api/v1/endpoints/`
-2. Frontend: Add pages in `frontend/src/pages/`
-3. Dashboard: Update `dashboard/app.py`
-4. Database: Add migrations in `snowflake/`
-
-## Deployment
-
-### Backend (Docker)
-
-```bash
-cd backend
-docker build -t auris-backend .
-docker run -p 8000:8000 --env-file .env auris-backend
-```
-
-### Frontend (Static Hosting)
-
-```bash
-cd frontend
-npm run build
-# Deploy build/ folder to Netlify/Vercel
-```
-
-### Dashboard (Streamlit Cloud)
-
-```bash
-# Push to GitHub, connect to Streamlit Cloud
-# Set secrets in Streamlit Cloud dashboard
-```
-
-## License
-
-MIT License - See LICENSE file
-
-## Support
-
-For support, contact: support@auris-health.com
+- **Auth0 JWT** validation for protected operations (see `app/core/auth.py` and
+  routers)
+- Role-aware profiles (`patient` / `therapist`) synced via auth routes
+- Audit middleware logs PHI-touching requests when configured
 
 ## Acknowledgments
 
-- SmartSpectra SDK by Presage Technologies
-- Snowflake Cortex AI
 - Auth0 for authentication
-- Twilio for notifications
+- Snowflake
+- SmartSpectra (Presage)
+- Optional: Twilio — when integrated via configuration
