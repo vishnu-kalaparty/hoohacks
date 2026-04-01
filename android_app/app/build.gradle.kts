@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -8,6 +11,10 @@ android {
         version = release(36) {
             minorApiLevel = 1
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     defaultConfig {
@@ -22,6 +29,16 @@ android {
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86_64"))
         }
+
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(FileInputStream(localPropertiesFile))
+        }
+
+        val apiKey = localProperties.getProperty("PRESAGE_API_KEY") ?: ""
+
+        buildConfigField("String", "PRESAGE_API_KEY", "\"$apiKey\"")
     }
 
     buildTypes {

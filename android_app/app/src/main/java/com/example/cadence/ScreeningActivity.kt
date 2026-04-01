@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.presagetech.smartspectra.SmartSpectraSdk
+import com.example.cadence.BuildConfig
 
 class ScreeningActivity : AppCompatActivity() {
 
@@ -124,7 +125,7 @@ class ScreeningActivity : AppCompatActivity() {
         try {
             SmartSpectraSdk.initialize(this.applicationContext)
             sdk = SmartSpectraSdk.getInstance()
-            sdk?.setApiKey("bJiNrgTbOliRbS2Nl3Et8LQ8WAICThi2Jcr3LpXb")
+            sdk?.setApiKey(BuildConfig.PRESAGE_API_KEY)
             sdk?.setMeasurementDuration(20.0)
 
             sdk?.setMetricsBufferObserver { buffer ->
